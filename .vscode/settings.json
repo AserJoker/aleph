@@ -1,0 +1,6 @@
+{
+    "cmake.configureArgs": [
+        "-DCMAKE_TOOLCHAIN_FILE=/home/w30029682/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "-DVCPKG_TRIPLET_TARGET=x64-linux"
+    ]
+}

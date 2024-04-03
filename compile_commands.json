@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/home/w30029682/aleph/build",
+    "command": "/usr/bin/c++  -isystem /home/w30029682/vcpkg/installed/x64-linux/include -g -std=gnu++2a -o CMakeFiles/aleph.dir/src/main.cc.o -c /home/w30029682/aleph/src/main.cc",
+    "file": "/home/w30029682/aleph/src/main.cc"
+  }
+]
