@@ -297,35 +297,6 @@ public:
       renderer->setOffset(off);
     }
   }
-  void drawHorizonalScroll(core::Auto<video::Renderer> &renderer) {
-    video::Size csize = size;
-    for (auto &c : children) {
-      auto rc = c->getBoundRect();
-      if (rc.x + rc.width >= csize.width) {
-        csize.width = rc.x + rc.width;
-      }
-      if (rc.y + rc.height >= csize.height) {
-        csize.height = rc.y + rc.height;
-      }
-    }
-    if (csize.width > size.width) {
-      auto width = size.width - 2;
-      width *= (size.width * 1.0f / csize.width);
-      if (width < 1) {
-        width = 1;
-      }
-      auto off = -offset.x * 1.0f / (csize.width - size.width) *
-                 (size.width - 2 - width);
-      auto attr = getFontAttr();
-      attr | device::Attribute::Standout;
-      renderer->draw(1, getBoundSize().height - 1, L'<', attr);
-      for (auto x = 0; x < width; x++) {
-        renderer->draw(x + off + 2, getBoundSize().height - 1, L' ', attr);
-      }
-      renderer->draw(getBoundSize().width - 2, getBoundSize().height - 1, L'>',
-                     attr);
-    }
-  }
   void drawVerticalScroll(core::Auto<video::Renderer> &renderer) {
     video::Size csize = size;
     for (auto &c : children) {
@@ -338,21 +309,18 @@ public:
       }
     }
     if (csize.height > size.height) {
-      auto height = size.height - 2;
+      auto height = size.height;
       height *= (size.height * 1.0f / csize.height);
       if (height < 1) {
         height = 1;
       }
-      auto off = -offset.y * 1.0f / (csize.height - size.height) *
-                 (size.height - 2 - height);
+      int32_t off = -offset.y * 1.0f / (csize.height - size.height) *
+                    (size.height - height);
       auto attr = getFontAttr();
       attr | device::Attribute::Standout;
-      renderer->draw(getBoundSize().width - 1, 1, L'+', attr);
       for (auto y = 0; y < height; y++) {
-        renderer->draw(getBoundSize().width - 1, y + off + 2, L' ', attr);
+        renderer->draw(getBoundSize().width - 1, y + off + 1, L' ', attr);
       }
-      renderer->draw(getBoundSize().width - 1, getBoundSize().height - 2, L'+',
-                     attr);
     }
   }
   void draw(core::Auto<video::Renderer> &renderer) {
@@ -412,7 +380,6 @@ public:
       for (auto x = 1; x <= contentSize.width; x++) {
         renderer->draw(x, contentSize.height + 1, border_top);
       }
-      drawHorizonalScroll(renderer);
     }
     if (border_left.ch) {
       for (auto y = 1; y <= contentSize.height; y++) {
