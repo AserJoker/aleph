@@ -40,12 +40,10 @@ Terminal::Terminal() : core::Object() {
   curs_set(0);
   set_escdelay(0);
   nodelay(stdscr, TRUE);
-  if (has_mouse()) {
-    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+  mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
 #ifdef NCURSES
-    ::printf("\033[?1003h\n");
+  ::printf("\033[?1003h\n");
 #endif
-  }
 }
 
 Terminal::~Terminal() { endwin(); }
