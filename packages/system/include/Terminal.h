@@ -9,6 +9,11 @@ private:
   std::unordered_map<uint32_t, short> _palette;
   std::unordered_map<uint32_t, short> _indices;
 
+private:
+  bool processMouse(int32_t input);
+  
+  bool processResize(int32_t input);
+
 public:
   Terminal();
 

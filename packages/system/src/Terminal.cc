@@ -14,7 +14,7 @@
     attroff(attr);                                                             \
   } while (0)
 #else
-#ifdef CURSES
+#ifdef NCURSES
 #include <ncursesw/ncurses.h>
 #define add_wchar(attr, ch)                                                    \
   do {                                                                         \
@@ -39,18 +39,40 @@ Terminal::Terminal() : core::Object() {
   curs_set(0);
   set_escdelay(0);
   nodelay(stdscr, TRUE);
-  mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+  if (has_mouse()) {
+    mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
+#ifdef NCURSES
+    printf("\033[?1003h\n");
+#endif
+  }
 }
 
 Terminal::~Terminal() { endwin(); }
 
+bool Terminal::processResize(int32_t input) {
+  if (input == KEY_RESIZE) {
+    emit(core::EventBase{"resize"});
+    return true;
+  }
+  return false;
+}
+
+bool Terminal::processMouse(int32_t input) {
+  if (input == KEY_MOUSE) {
+    return true;
+  }
+  return false;
+}
+
 void Terminal::pollEvent() {
   auto ch = getch();
-  if (ch == EVENT_RESIZE) {
-    emit(core::EventBase{"resize"});
-  } else {
-    emit(InputEvent{ch});
+  if (processMouse(ch)) {
+    return;
   }
+  if (processResize(ch)) {
+    return;
+  }
+  emit(InputEvent{ch});
 }
 
 void Terminal::print(int x, int y, const char *msg) { mvprintw(y, x, msg); }
