@@ -15,8 +15,9 @@
   } while (0)
 #else
 #ifdef NCURSES
-#include <ncursesw/ncurses.h>
 #include <cstdio>
+#include <ncursesw/ncurses.h>
+
 #define add_wchar(attr, ch)                                                    \
   do {                                                                         \
     cchar_t cc = {attr, {ch, 0}};                                              \
@@ -74,7 +75,9 @@ void Terminal::pollEvent() {
   emit(InputEvent{ch});
 }
 
-void Terminal::print(int x, int y, const char *msg) { mvprintw(y, x, msg); }
+void Terminal::print(int x, int y, const char *msg) {
+  mvprintw(y, x, "%s", msg);
+}
 
 void Terminal::setColor(uint32_t fg, uint32_t bg) {
   if (!_palette.contains(fg)) {
