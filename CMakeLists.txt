@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.12)
+project(darkland)
+
+set(CMAKE_CXX_STANDARD 20)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    add_definitions(-DPDCURSES)
+    find_package(unofficial-pdcurses CONFIG REQUIRED)
+else()
+    add_definitions(-DNCURSES)
+    set(CURSES_NEED_NCURSES TRUE)
+    set(CURSES_NEED_WIDE TRUE)
+    find_package(Curses REQUIRED)
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    link_libraries(unofficial::pdcurses::pdcurses)
+else()
+    include_directories(${CURSES_INCLUDE_DIRS})
+    compile_options(${CURSES_CFLAGS})
+    link_libraries(${CURSES_LIBRARIES})
+endif()
+
+file(GLOB PACKAGES_DIRS ${PROJECT_SOURCE_DIR}/packages/*)
+include_directories(${PROJECT_SOURCE_DIR}/packages)
+file(GLOB_RECURSE PACKAGES ${PROJECT_SOURCE_DIR}/packages/*.cc)
+add_library(aleph ${PACKAGES})
+
+file(GLOB PROJECTS ${PROJECT_SOURCE_DIR}/projects/*)
+
+foreach(PROJECT ${PROJECTS})
+    get_filename_component(CURRENT_PROJECT_NAME ${PROJECT} NAME)
+    file(GLOB_RECURSE ${CURRENT_PROJECT_NAME}_SOURCES ${PROJECT}/src/*.cc)
+    add_executable(${CURRENT_PROJECT_NAME} ${${CURRENT_PROJECT_NAME}_SOURCES})
+    target_include_directories(${CURRENT_PROJECT_NAME} PUBLIC ${PROJECT}/include)
+    target_link_libraries(${CURRENT_PROJECT_NAME} PRIVATE aleph)
+endforeach(PROJECT ${PROJECTS})
