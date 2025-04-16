@@ -17,7 +17,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     link_libraries(unofficial::pdcurses::pdcurses)
 else()
     include_directories(${CURSES_INCLUDE_DIRS})
-    compile_options(${CURSES_CFLAGS})
+    add_compile_options(${CURSES_CFLAGS})
     link_libraries(${CURSES_LIBRARIES})
 endif()
 
