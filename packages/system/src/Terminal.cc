@@ -16,6 +16,7 @@
 #else
 #ifdef NCURSES
 #include <ncursesw/ncurses.h>
+#include <cstdio>
 #define add_wchar(attr, ch)                                                    \
   do {                                                                         \
     cchar_t cc = {attr, {ch, 0}};                                              \
