@@ -1,4 +1,4 @@
-#include "system/include/InputEvent.h"
+#include "system/include/InputEvent.hpp"
 #include "core/include/EventBase.hpp"
 using namespace aleph;
 using namespace aleph::system;
