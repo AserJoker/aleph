@@ -9,7 +9,7 @@ namespace aleph::system {
 class Terminal : public core::Object {
 private:
   std::unordered_map<uint32_t, short> _palette;
-  
+
   std::unordered_map<uint32_t, short> _indices;
 
   core::Point _mouse;
@@ -19,6 +19,8 @@ private:
 
   bool processResize(int32_t input);
 
+  bool processKeyboard(int32_t input);
+
 public:
   Terminal();
 
@@ -26,11 +28,11 @@ public:
 
   void pollEvent();
 
-  void print(int x, int y, const char *msg);
+  void print(int x, int y, const wchar_t *msg);
 
-  void printf(int x, int y, const char *fmt, auto... args) {
-    char buf[1024];
-    sprintf(buf, fmt, args...);
+  void printf(int x, int y, const wchar_t *fmt, auto... args) {
+    wchar_t buf[1024];
+    swprintf(buf, fmt, args...);
     print(x, y, buf);
   }
 

@@ -1,9 +1,10 @@
 #include "runtime/include/Application.hpp"
 #include "core/include/Object.hpp"
 #include "system/include/ButtonPressEvent.hpp"
-#include "system/include/InputEvent.hpp"
+#include "system/include/KeyboardEvent.hpp"
 #include "system/include/Terminal.hpp"
 #include <clocale>
+#include <curses.h>
 #include <thread>
 
 using namespace std::chrono;
@@ -24,16 +25,24 @@ Application::~Application() {}
 
 void Application::onResize() {}
 
-void Application::onInput(const system::InputEvent &event) {
+void Application::onInput(const system::KeyboardEvent &event) {
   auto key = event.getKey();
-  _terminal->printf(0, 1, "key:0x%x", key);
-  if (key == 0x1b) {
+  auto size = _terminal->getTerminalSize();
+  if (key == L"r") {
+    for (uint32_t x = 0; x < size.width; x++) {
+      _terminal->print(x, 1, L" ");
+    }
+    refresh();
+  } else if (key == L"escape") {
     exit();
+  } else {
+    _terminal->printf(0, 1, L"key:%ls", key.c_str());
+    refresh();
   }
 }
 
 void Application::onButtonPress(const system::ButtonPressEvent &event) {
-  _terminal->printf(0, 0, "button %d click,x=%d,y=%d", event.getButton(),
+  _terminal->printf(0, 0, L"button %d click,x=%d,y=%d", event.getButton(),
                     _terminal->getMousePosition().x,
                     _terminal->getMousePosition().y);
 }
@@ -50,7 +59,7 @@ void Application::onEvent(core::Object *emitter, const core::EventBase &event) {
   if (event.getType() == "resize") {
     onResize();
   } else if (event.getType() == "input") {
-    onInput((const system::InputEvent &)event);
+    onInput((const system::KeyboardEvent &)event);
   } else if (event.getType() == "button_press") {
     onButtonPress((const system::ButtonPressEvent &)event);
   }

@@ -3,7 +3,7 @@
 #include "core/include/EventBase.hpp"
 #include "core/include/Object.hpp"
 #include "system/include/ButtonPressEvent.hpp"
-#include "system/include/InputEvent.hpp"
+#include "system/include/KeyboardEvent.hpp"
 #include "system/include/Terminal.hpp"
 #include <cstdint>
 namespace aleph::runtime {
@@ -18,7 +18,7 @@ private:
 protected:
   virtual void onResize();
 
-  virtual void onInput(const system::InputEvent &event);
+  virtual void onInput(const system::KeyboardEvent &event);
 
   virtual void onButtonPress(const system::ButtonPressEvent &event);
 
