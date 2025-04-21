@@ -12,7 +12,7 @@ public:
 
   void cleanup();
 
-  int readInput();
+  void pollInput();
 
   void present();
 

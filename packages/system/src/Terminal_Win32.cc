@@ -36,7 +36,7 @@ void Terminal::cleanup() {
   SetConsoleMode(hOutput, mode);
 }
 
-int Terminal::readInput() {
+void Terminal::pollInput() {
   DWORD num = 0;
   INPUT_RECORD event = {};
   DWORD readnum = 0;
@@ -46,7 +46,13 @@ int Terminal::readInput() {
     while (num > 0) {
       ReadConsoleInput(hInput, &event, 1, &readnum);
       if (event.EventType == KEY_EVENT && event.Event.KeyEvent.bKeyDown) {
-        codes.push_back(event.Event.KeyEvent.uChar.AsciiChar);
+        if (event.Event.KeyEvent.uChar.UnicodeChar == 0x1b) {
+          if (codes.size()) {
+            emit(InputEvent{codes});
+            codes.clear();
+          }
+        }
+        codes.push_back(event.Event.KeyEvent.uChar.UnicodeChar);
       } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
         _size.width = event.Event.WindowBufferSizeEvent.dwSize.X;
         _size.height = event.Event.WindowBufferSizeEvent.dwSize.Y;
@@ -55,12 +61,10 @@ int Terminal::readInput() {
     }
     if (!codes.empty()) {
       emit(InputEvent{codes});
-      return TRUE;
     }
   }
   move(1, 1);
   printf("%d,%d", _size.width, _size.height);
-  return FALSE;
 }
 
 void Terminal::present() { fflush(STDIN_FILENO); }

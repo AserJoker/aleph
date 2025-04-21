@@ -61,10 +61,9 @@ public:
     _terminal->clear();
     _terminal->present();
     while (_running) {
-      if (!_terminal->readInput()) {
-        using namespace std::chrono;
-        std::this_thread::sleep_for(10ms);
-      }
+      using namespace std::chrono;
+      _terminal->pollInput();
+      std::this_thread::sleep_for(10ms);
     }
     _terminal->clear();
     _terminal->present();
