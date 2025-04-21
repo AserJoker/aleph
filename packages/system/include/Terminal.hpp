@@ -1,8 +1,12 @@
 #pragma once
 #include "core/include/Object.hpp"
+#include "core/include/Size.hpp"
 
 namespace aleph::system {
 class Terminal : public core::Object {
+private:
+  core::Size _size;
+
 public:
   void setup();
 
