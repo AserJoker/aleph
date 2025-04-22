@@ -1,10 +1,11 @@
 #pragma once
 #include "core/include/EventBase.hpp"
+#include <cstdint>
 namespace aleph::system {
 class ButtonEvent : public core::EventBase {
 private:
-  int _button;
-  
+  uint32_t _button;
+
   bool _status;
 
   bool _shift;
@@ -14,10 +15,10 @@ private:
   bool _alt;
 
 public:
-  ButtonEvent(int button, bool status, bool shift = false, bool control = false,
-              bool alt = false);
+  ButtonEvent(uint32_t button, bool status, bool shift = false,
+              bool control = false, bool alt = false);
 
-  int getButton() const;
+  uint32_t getButton() const;
 
   bool getStatus() const;
 
@@ -26,5 +27,7 @@ public:
   bool isControl() const;
 
   bool isAlt() const;
+
+  static inline constexpr auto TYPE = "system.mouse";
 };
 }; // namespace aleph::system

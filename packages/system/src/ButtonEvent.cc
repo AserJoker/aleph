@@ -2,12 +2,12 @@
 #include "core/include/EventBase.hpp"
 using namespace aleph;
 using namespace aleph::system;
-ButtonEvent::ButtonEvent(int button, bool status, bool shift, bool control,
+ButtonEvent::ButtonEvent(uint32_t button, bool status, bool shift, bool control,
                          bool alt)
-    : core::EventBase("button"), _button(button), _status(status),
-      _shift(shift), _control(control), _alt(alt) {}
-      
-int ButtonEvent::getButton() const { return _button; }
+    : core::EventBase(TYPE), _button(button), _status(status), _shift(shift),
+      _control(control), _alt(alt) {}
+
+uint32_t ButtonEvent::getButton() const { return _button; }
 
 bool ButtonEvent::getStatus() const { return _status; }
 
