@@ -211,6 +211,6 @@ void Terminal::setColor(const core::Color &color) {
 }
 
 void Terminal::setBackgroundColor(const core::Color &color) {
-  printf("\033[38;2;%d;%d;%dm", color.r, color.g, color.b);
+  printf("\033[48;2;%d;%d;%dm", color.r, color.g, color.b);
 }
 #endif

@@ -1,4 +1,5 @@
 #include "core/include/AutoPtr.hpp"
+#include "core/include/Color.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -39,11 +40,13 @@ public:
       for (uint8_t i = 0; i < 16; i++) {
         _terminal->move(10, 10 + i);
         for (uint8_t j = 0; j < 16; j++) {
-          _terminal->setColor(idx++);
+          _terminal->setBackgroundColor(core::Color{(uint8_t)idx, 0, 0});
           printf("%3d ", idx);
+          idx++;
         }
       }
       _terminal->move(1, 2);
+      _terminal->setNormal();
       _terminal->setColor(core::Color{0x1cfff});
       printf("hello world");
       _terminal->setNormal();
