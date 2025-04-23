@@ -1,5 +1,6 @@
 
 
+#include "core/include/Color.hpp"
 #ifdef WIN32
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
@@ -18,35 +19,34 @@ using namespace aleph;
 using namespace aleph::system;
 Terminal::Terminal() : _mouseStatus(0) {}
 
+static DWORD oldInputMode = 0;
+static DWORD oldOutputMode = 0;
+
 void Terminal::setup() {
   SetConsoleCP(CP_UTF8);
   SetConsoleOutputCP(CP_UTF8);
   HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
   DWORD mode = 0;
   GetConsoleMode(hOutput, &mode);
+  oldInputMode = mode;
   mode |= (ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
   SetConsoleMode(hOutput, mode);
   mode = 0;
   HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
   GetConsoleMode(hInput, &mode);
+  oldInputMode = mode;
   SetConsoleMode(hInput, ENABLE_EXTENDED_FLAGS);
   SetConsoleMode(hInput, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  GetConsoleScreenBufferInfo(hOutput, &csbi);
+  CONSOLE_SCREEN_BUFFER_INFOEX csbi = {};
+  GetConsoleScreenBufferInfoEx(hOutput, &csbi);
   _size.width = csbi.dwSize.X;
   _size.height = csbi.dwSize.Y;
 }
 void Terminal::cleanup() {
-  DWORD mode = 0;
   HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-  GetConsoleMode(hInput, &mode);
-  mode &= ~(ENABLE_VIRTUAL_TERMINAL_INPUT);
-  mode |= ENABLE_PROCESSED_INPUT;
-  SetConsoleMode(hInput, mode);
+  SetConsoleMode(hInput, oldInputMode);
   HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-  GetConsoleMode(hOutput, &mode);
-  mode &= ~(ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
-  SetConsoleMode(hOutput, mode);
+  SetConsoleMode(hOutput, oldOutputMode);
 }
 
 int64_t Terminal::readInput() {
@@ -116,9 +116,6 @@ void Terminal::parseEvent() {
 }
 
 void Terminal::pollEvent() {
-  move(1, 1);
-  printf("%d,%d", _size.width, _size.height);
-  present();
   DWORD num = 0;
   HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
   if (!GetNumberOfConsoleInputEvents(hInput, &num)) {
@@ -150,9 +147,7 @@ void Terminal::setCursor(bool visible) {
   printf("\033[?25%c", visible ? 'h' : 'l');
 }
 
-void Terminal::setMouse(bool enable) {
-  printf("\033[?1003;%c", enable ? 'h' : 'l');
-}
+void Terminal::setMouse(bool enable) {}
 
 void Terminal::saveCursor() { printf("\033[s"); }
 
@@ -162,4 +157,60 @@ const core::Size &Terminal::getSize() const { return _size; }
 
 const core::Point &Terminal::getMousePosition() const { return _mouse; }
 
+void Terminal::setNormal() { printf("\033[0m"); }
+
+void Terminal::setBold(bool enable) { printf("\033[%dm", enable ? 1 : 22); }
+
+void Terminal::setHalfBright(bool enable) {
+  printf("\033[%dm", enable ? 2 : 22);
+}
+
+void Terminal::setItalic(bool enable) { printf("\033[%dm", enable ? 3 : 23); }
+
+void Terminal::setUnderline(bool enable) {
+  printf("\033[%dm", enable ? 4 : 24);
+}
+
+void Terminal::setBlink(bool enable) { printf("\033[%dm", enable ? 5 : 25); }
+
+void Terminal::setReverseVideo(bool enable) {
+  printf("\033[%dm", enable ? 7 : 27);
+}
+void Terminal::setColor(const TERMINAL_COLOR_16 &color, bool bright) {
+  char c = (char)color;
+  if (bright) {
+    c += 60;
+  }
+  printf("\033[%dm", c);
+};
+
+void Terminal::setBackgroundColor(const TERMINAL_COLOR_16 &color, bool bright) {
+  char c = (char)color;
+  c += 10;
+  if (bright) {
+    c += 60;
+  }
+  printf("\033[%dm", c);
+};
+
+void Terminal::setColor(uint8_t color) { printf("\033[38;5;%dm", color); }
+
+void Terminal::setBackgroundColor(uint8_t color) {
+  printf("\033[48;5;%dm", color);
+}
+void Terminal::setPalette(uint8_t idx, const core::Color &color) {
+  printf("\033]4;%d;rgb:%x/%x/%x\007", idx, color.r, color.g, color.b);
+}
+
+void Terminal::setPalette(uint8_t idx, uint32_t color) {
+  setPalette(idx, core::Color{color});
+}
+
+void Terminal::setColor(const core::Color &color) {
+  printf("\033[38;2;%d;%d;%dm", color.r, color.g, color.b);
+}
+
+void Terminal::setBackgroundColor(const core::Color &color) {
+  printf("\033[38;2;%d;%d;%dm", color.r, color.g, color.b);
+}
 #endif
