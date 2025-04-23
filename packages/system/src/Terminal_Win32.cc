@@ -1,14 +1,18 @@
 
 
-#include "system/include/WheelEvent.hpp"
 #ifdef WIN32
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
 #include "system/include/Terminal.hpp"
+#include "system/include/WheelEvent.hpp"
 #include <windows.h>
 
 #define IS_ENABLE(val, n) (((val) >> (n)) & 1)
 #define IS_DISABLE(val, n) (((val) >> (n) & 1) == 0)
+
+#ifndef STDIN_FILENO
+#define STDIN_FILENO stdin
+#endif
 
 using namespace aleph;
 using namespace aleph::system;
@@ -16,6 +20,7 @@ Terminal::Terminal() : _mouseStatus(0) {}
 
 void Terminal::setup() {
   SetConsoleCP(CP_UTF8);
+  SetConsoleOutputCP(CP_UTF8);
   HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
   DWORD mode = 0;
   GetConsoleMode(hOutput, &mode);
@@ -60,20 +65,24 @@ int64_t Terminal::readInput() {
     _mouse.x = event.Event.MouseEvent.dwMousePosition.X;
     _mouse.y = event.Event.MouseEvent.dwMousePosition.Y;
 
-    if (event.Event.MouseEvent.dwEventFlags == MOUSE_MOVED) {
-    } else if (event.Event.MouseEvent.dwEventFlags == 0) {
+    if (event.Event.MouseEvent.dwEventFlags == 0) {
+      bool shift = event.Event.MouseEvent.dwControlKeyState & SHIFT_PRESSED;
+      bool control = event.Event.MouseEvent.dwControlKeyState &
+                     (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED);
+      bool alt = event.Event.MouseEvent.dwControlKeyState &
+                 (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED);
       for (uint32_t idx = 0; idx < 16; idx++) {
         uint32_t flag = 1 << idx;
         auto button = event.Event.MouseEvent.dwButtonState & flag;
         if (button) {
           if (!(_mouseStatus & flag)) {
             _mouseStatus |= flag;
-            emit(ButtonEvent{idx, true});
+            emit(ButtonEvent{idx, true, shift, control, alt});
           }
         } else {
-          if (_mouseStatus & (1 << idx)) {
-            _mouseStatus &= ~(1 << idx);
-            emit(ButtonEvent{idx, false});
+          if (_mouseStatus & (flag)) {
+            _mouseStatus &= ~(flag);
+            emit(ButtonEvent{idx, false, shift, control, alt});
           }
         }
       }
@@ -90,7 +99,7 @@ int64_t Terminal::readInput() {
 
 void Terminal::parseEvent() {
   auto ch = readInput();
-  if (ch == -1) {
+  if (ch == -1 || ch == 0) {
     return;
   }
   _codes.push_back(ch);

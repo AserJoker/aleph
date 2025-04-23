@@ -1,5 +1,4 @@
 #include "core/include/AutoPtr.hpp"
-#include "core/include/EventBase.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -16,41 +15,75 @@
 #include <vector>
 
 using namespace aleph;
+
+std::wstring UTF8_to_wchar(const char *in) {
+  std::wstring out;
+  unsigned int codepoint;
+  while (*in != 0) {
+    unsigned char ch = static_cast<unsigned char>(*in);
+    if (ch <= 0x7f)
+      codepoint = ch;
+    else if (ch <= 0xbf)
+      codepoint = (codepoint << 6) | (ch & 0x3f);
+    else if (ch <= 0xdf)
+      codepoint = ch & 0x1f;
+    else if (ch <= 0xef)
+      codepoint = ch & 0x0f;
+    else
+      codepoint = ch & 0x07;
+    ++in;
+    if (((*in & 0xc0) != 0x80) && (codepoint <= 0x10ffff)) {
+      if (sizeof(wchar_t) > 2)
+        out.append(1, static_cast<wchar_t>(codepoint));
+      else if (codepoint > 0xffff) {
+        codepoint -= 0x10000;
+        out.append(1, static_cast<wchar_t>(0xd800 + (codepoint >> 10)));
+        out.append(1, static_cast<wchar_t>(0xdc00 + (codepoint & 0x03ff)));
+      } else if (codepoint < 0xd800 || codepoint >= 0xe000)
+        out.append(1, static_cast<wchar_t>(codepoint));
+    }
+  }
+  return out;
+}
+
 class Application : public core::Object {
 private:
-  core::AutoPtr<system::Terminal> _terminal;
+  core::AutoPtr<system::Terminal> _terminal =
+      core::Singleton<system::Terminal>::get();
 
-  bool _running;
+  bool _running = true;
 
   int _y = 3;
 
 public:
   Application() : _running(true) {
-    _terminal = core::Singleton<system::Terminal>::get();
-    _terminal->addEventListener("input", this);
-    _terminal->addEventListener("keyboard", this);
-    _terminal->addEventListener("button", this);
-    _terminal->addEventListener("wheel", this);
+    on(&Application::onInput);
+    on(&Application::onKeyboard);
+    on(&Application::onWheel);
+    on(&Application::onButton);
   }
+
   ~Application() { _terminal->cleanup(); }
 
-  void onButton(const system::ButtonEvent &event) {
-    _terminal->move(50, 1);
-    auto pos = _terminal->getMousePosition();
+  void onButton(Object *, const system::ButtonEvent &event) {
+    _terminal->move(10, 1);
+    auto &pos = _terminal->getMousePosition();
     printf("                                                    ");
-    printf("x: %d,y: %d,button: %d,status: %d", pos.x, pos.y, event.getButton(),
-           event.getStatus());
+    _terminal->move(10, 1);
+    printf("x: %d,y: %d,button: %d,status: %d,shift :%d,control :%d,alt :%d",
+           pos.x, pos.y, event.getButton(), event.getStatus(), event.isShift(),
+           event.isControl(), event.isAlt());
   }
 
-  void onWheel(const system::WheelEvent &event) {
-    _terminal->move(50, 2);
+  void onWheel(Object *, const system::WheelEvent &event) {
+    _terminal->move(10, 2);
     printf("                                                    ");
+    _terminal->move(10, 2);
     printf("wheel:%d", event.getDirection());
   }
 
-  void onInput(const system::InputEvent &event) {
-    // _terminal->clear();
-    auto codes = event.getCodes();
+  void onInput(Object *, const system::InputEvent &event) {
+    auto &codes = event.getCodes();
     std::string str = "";
     if (codes[0] == 'q') {
       _running = false;
@@ -66,30 +99,18 @@ public:
     printf("%s", str.c_str());
     _terminal->present();
   }
-  void onKeyboard(const system::KeyboardEvent &event) {
+
+  void onKeyboard(Object *, const system::KeyboardEvent &event) {
     if (event.getKey() == 'q') {
       _running = false;
       return;
     }
     _terminal->move(1, 2);
-    printf("0x%llx", event.getKey());
+    printf("0x%llu", event.getKey());
     _terminal->present();
   }
 
-  void onEvent(core::Object *_, const core::EventBase &event) {
-    if (event.getType() == "input") {
-      onInput((const system::InputEvent &)event);
-    } else if (event.getType() == "keyboard") {
-      onKeyboard((const system::KeyboardEvent &)event);
-    } else if (event.getType() == "button") {
-      onButton((const system::ButtonEvent &)event);
-    } else if (event.getType() == "wheel") {
-      onWheel((const system::WheelEvent &)event);
-    }
-  }
-
   int run() {
-    // setlocale(LC_ALL, "");
     std::string input;
     _terminal->setup();
     _terminal->saveCursor();
