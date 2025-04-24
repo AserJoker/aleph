@@ -64,257 +64,282 @@ void Terminal::parseEvent() {
   }
   if (ch == Key::ESC) {
     while (true) {
-      if (!_codes.empty() && (ch == -1 || ch == Key::ESC)) {
-        if (_codes[0] == Key::ESC) {
-          if (_codes.size() == 1) {
+      if (ch == -1 || ch == Key::ESC) {
+        if (!_codes.empty()) {
+          if (_codes[0] == Key::ESC) {
+            if (_codes.size() == 1) {
+              emit(InputEvent{_codes});
+              _codes.clear();
+            } else if (_codes.size() == 2) {
+              emit(InputEvent{{_codes[1] | Key::FLAG_META}}); // ^{x}
+              _codes.clear();
+            } else {
+              if (_codes[1] == '[') {
+                if (_codes.size() == 3) {
+                  if (_codes[2] == 'A') {
+                    emit({InputEvent{{Key::UP}}}); // ESC[A
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'B') {
+                    emit({InputEvent{{Key::DOWN}}});
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'C') {
+                    emit({InputEvent{{Key::RIGHT}}});
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'D') {
+                    emit({InputEvent{{Key::LEFT}}});
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'F') {
+                    emit({InputEvent{{Key::END}}});
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'H') {
+                    emit({InputEvent{{Key::HOME}}});
+                    _codes.clear();
+                  }
+                  if (_codes[2] == 'Z') {
+                    emit({InputEvent{{Key::TAB | Key::FLAG_SHIFT}}});
+                    _codes.clear();
+                  }
+                }
+                if (_codes.size() == 4) {
+                  if (_codes[3] == '~') {
+                    if (_codes[2] == '2') {
+                      emit(InputEvent{{Key::INSERT}}); // ESC[2~
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '3') {
+                      emit(InputEvent{{Key::DEL}});
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '5') {
+                      emit(InputEvent{{Key::PAGE_UP}});
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '6') {
+                      emit(InputEvent{{Key::PAGE_DOWN}});
+                      _codes.clear();
+                    }
+                  }
+                }
+                if (_codes.size() == 5) {
+                  if (_codes[4] == '~') {
+                    if (_codes[2] == '1' && _codes[3] == '5') {
+                      emit(InputEvent({Key::F(5)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '1' && _codes[3] == '7') {
+                      emit(InputEvent({Key::F(6)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '1' && _codes[3] == '8') {
+                      emit(InputEvent({Key::F(7)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '1' && _codes[3] == '9') {
+                      emit(InputEvent({Key::F(8)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '2' && _codes[3] == '0') {
+                      emit(InputEvent({Key::F(9)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '2' && _codes[3] == '1') {
+                      emit(InputEvent({Key::F(10)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '2' && _codes[3] == '3') {
+                      emit(InputEvent({Key::F(11)}));
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '2' && _codes[3] == '4') {
+                      emit(InputEvent({Key::F(12)}));
+                      _codes.clear();
+                    }
+                  }
+                }
+                if (_codes.size() == 6) {
+                  if (_codes[2] == '1' && _codes[3] == ';') {
+                    int64_t flag = 0;
+                    if (_codes[4] == '2') {
+                      flag = Key::FLAG_SHIFT;
+                    }
+                    if (_codes[4] == '3') {
+                      flag = Key::FLAG_CTRL;
+                    }
+                    if (_codes[4] == '5') {
+                      flag = Key::FLAG_META;
+                    }
+                    if (_codes[5] == 'A') {
+                      emit(InputEvent{{Key::UP | flag}}); // ESC[1;2A
+                      _codes.clear();
+                    }
+                    if (_codes[5] == 'B') {
+                      emit(InputEvent{{Key::DOWN | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[5] == 'C') {
+                      emit(InputEvent{{Key::RIGHT | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[5] == 'D') {
+                      emit(InputEvent{{Key::LEFT | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[5] == 'F') {
+                      emit(InputEvent{{Key::END | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[5] == 'H') {
+                      emit(InputEvent{{Key::HOME | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[5] >= 'P' && _codes[5] <= 'S') {
+                      emit(InputEvent{{Key::F(_codes[5] - 'P' + 1) | flag}});
+                      _codes.clear();
+                    }
+                  }
+                  if (_codes[5] == '~' && _codes[3] == ';') {
+                    int64_t flag = 0;
+                    if (_codes[4] == '2') {
+                      flag = Key::FLAG_SHIFT;
+                    }
+                    if (_codes[4] == '3') {
+                      flag = Key::FLAG_CTRL;
+                    }
+                    if (_codes[4] == '5') {
+                      flag = Key::FLAG_META;
+                    }
+                    if (_codes[2] == '2') {
+                      emit(InputEvent{{Key::INSERT | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '3') {
+                      emit(InputEvent{{Key::DEL | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '5') {
+                      emit(InputEvent{{Key::PAGE_UP | flag}});
+                      _codes.clear();
+                    }
+                    if (_codes[2] == '6') {
+                      emit(InputEvent{{Key::PAGE_DOWN | flag}});
+                      _codes.clear();
+                    }
+                  }
+                }
+                if (_codes.size() == 7) {
+                  int64_t flag = 0;
+                  if (_codes[6] == '~' && _codes[4] == ';') {
+                    if (_codes[5] == '2') {
+                      flag = Key::FLAG_SHIFT;
+                    }
+                    if (_codes[6] == '3') {
+                      flag = Key::FLAG_CTRL;
+                    }
+                    if (_codes[6] == '4') {
+                      flag = Key::FLAG_META;
+                    }
+                    if (_codes[3] == '1' && _codes[4] == '5') {
+                      emit(InputEvent({Key::F(5) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '1' && _codes[4] == '7') {
+                      emit(InputEvent({Key::F(6) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '1' && _codes[4] == '8') {
+                      emit(InputEvent({Key::F(7) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '1' && _codes[4] == '9') {
+                      emit(InputEvent({Key::F(8) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '2' && _codes[4] == '0') {
+                      emit(InputEvent({Key::F(9) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '2' && _codes[4] == '1') {
+                      emit(InputEvent({Key::F(10) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '2' && _codes[4] == '3') {
+                      emit(InputEvent({Key::F(11) | flag}));
+                      _codes.clear();
+                    }
+                    if (_codes[3] == '2' && _codes[4] == '4') {
+                      emit(InputEvent({Key::F(12) | flag}));
+                      _codes.clear();
+                    }
+                  }
+                }
+              }
+              if (_codes.size() == 3 && _codes[1] == 'O' && _codes[2] >= 'P' &&
+                  _codes[2] <= 'S') {
+                emit(InputEvent{{Key::F(_codes[2] - 'P' + 1)}});
+                _codes.clear();
+              }
+              if (_codes[2] == '<') {
+                uint32_t btn = 0;
+                int32_t x = 0;
+                int32_t y = 0;
+                std::string str;
+                while (!_codes.empty()) {
+                  auto ch = *_codes.begin();
+                  _codes.erase(_codes.begin());
+                  str.push_back(ch);
+                  if (ch == 'm' || ch == 'M') {
+                    break;
+                  }
+                }
+                if (str[str.length() - 1] == 'm') {
+                  sscanf(str.c_str(), "\033[<%d;%d;%dm", &btn, &x, &y);
+                  if (btn == 35 || btn == 51 || btn == 43) {
+                    _mouse.x = x;
+                    _mouse.y = y;
+                  } else {
+                    if (btn >= 0 && btn < 4) {
+                      emit(ButtonEvent{btn, false});
+                    } else if (btn >= 4 && btn < 7) {
+                      emit(ButtonEvent{btn - 4, false, true, false, false});
+                    } else if (btn >= 8 && btn < 11) {
+                      emit(ButtonEvent{btn - 8, false, false, false, true});
+                    } else if (btn >= 16 && btn < 19) {
+                      emit(ButtonEvent{btn - 16, false, false, true, false});
+                    }
+                  }
+                }
+                if (str[str.length() - 1] == 'M') {
+                  sscanf(str.c_str(), "\033[<%d;%d;%dM", &btn, &x, &y);
+                  if (btn == 35 || btn == 51 || btn == 43) {
+                    _mouse.x = x;
+                    _mouse.y = y;
+                  } else if (btn == 64 || btn == 68 || btn == 80 || btn == 72) {
+                    emit(WheelEvent{true});
+                  } else if (btn == 65 || btn == 69 || btn == 81 || btn == 73) {
+                    emit(WheelEvent{true});
+                  } else {
+                    if (btn >= 0 && btn < 4) {
+                      emit(ButtonEvent{btn, true});
+                    } else if (btn >= 4 && btn < 7) {
+                      emit(ButtonEvent{btn - 4, true, true, false, false});
+                    } else if (btn >= 8 && btn < 11) {
+                      emit(ButtonEvent{btn - 8, true, false, false, true});
+                    } else if (btn >= 16 && btn < 19) {
+                      emit(ButtonEvent{btn - 16, true, false, true, false});
+                    }
+                  }
+                }
+              }
+            }
+          } else {
             emit(InputEvent{_codes});
             _codes.clear();
-          } else if (_codes.size() == 2) {
-            emit(InputEvent{{_codes[1] | Key::FLAG_META}}); // ^{x}
-            _codes.clear();
-          } else {
-            if (_codes[1] == '[') {
-              if (_codes.size() == 3) {
-                if (_codes[2] == 'A') {
-                  emit({InputEvent{{Key::UP}}}); // ESC[A
-                  _codes.clear();
-                }
-                if (_codes[2] == 'B') {
-                  emit({InputEvent{{Key::DOWN}}});
-                  _codes.clear();
-                }
-                if (_codes[2] == 'C') {
-                  emit({InputEvent{{Key::RIGHT}}});
-                  _codes.clear();
-                }
-                if (_codes[2] == 'D') {
-                  emit({InputEvent{{Key::LEFT}}});
-                  _codes.clear();
-                }
-                if (_codes[2] == 'F') {
-                  emit({InputEvent{{Key::END}}});
-                  _codes.clear();
-                }
-                if (_codes[2] == 'H') {
-                  emit({InputEvent{{Key::HOME}}});
-                  _codes.clear();
-                }
-                if (_codes[2] == 'Z') {
-                  emit({InputEvent{{Key::TAB | Key::FLAG_SHIFT}}});
-                  _codes.clear();
-                }
-              }
-              if (_codes.size() == 4) {
-                if (_codes[3] == '~') {
-                  if (_codes[2] == '2') {
-                    emit(InputEvent{{Key::INSERT}}); // ESC[2~
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '3') {
-                    emit(InputEvent{{Key::DEL}});
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '5') {
-                    emit(InputEvent{{Key::PAGE_UP}});
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '6') {
-                    emit(InputEvent{{Key::PAGE_DOWN}});
-                    _codes.clear();
-                  }
-                }
-              }
-              if (_codes.size() == 5) {
-                if (_codes[4] == '~') {
-                  if (_codes[2] == '1' && _codes[3] == '5') {
-                    emit(InputEvent({Key::F(5)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '1' && _codes[3] == '7') {
-                    emit(InputEvent({Key::F(6)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '1' && _codes[3] == '8') {
-                    emit(InputEvent({Key::F(7)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '1' && _codes[3] == '9') {
-                    emit(InputEvent({Key::F(8)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '2' && _codes[3] == '0') {
-                    emit(InputEvent({Key::F(9)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '2' && _codes[3] == '1') {
-                    emit(InputEvent({Key::F(10)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '2' && _codes[3] == '3') {
-                    emit(InputEvent({Key::F(11)}));
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '2' && _codes[3] == '4') {
-                    emit(InputEvent({Key::F(12)}));
-                    _codes.clear();
-                  }
-                }
-              }
-              if (_codes.size() == 6) {
-                if (_codes[2] == '1' && _codes[3] == ';') {
-                  int64_t flag = 0;
-                  if (_codes[4] == '2') {
-                    flag = Key::FLAG_SHIFT;
-                  }
-                  if (_codes[4] == '3') {
-                    flag = Key::FLAG_CTRL;
-                  }
-                  if (_codes[4] == '5') {
-                    flag = Key::FLAG_META;
-                  }
-                  if (_codes[5] == 'A') {
-                    emit(InputEvent{{Key::UP | flag}}); // ESC[1;2A
-                    _codes.clear();
-                  }
-                  if (_codes[5] == 'B') {
-                    emit(InputEvent{{Key::DOWN | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[5] == 'C') {
-                    emit(InputEvent{{Key::RIGHT | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[5] == 'D') {
-                    emit(InputEvent{{Key::LEFT | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[5] == 'F') {
-                    emit(InputEvent{{Key::END | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[5] == 'H') {
-                    emit(InputEvent{{Key::HOME | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[5] >= 'P' && _codes[5] <= 'S') {
-                    emit(InputEvent{{Key::F(_codes[5] - 'P' + 1) | flag}});
-                    _codes.clear();
-                  }
-                }
-                if (_codes[5] == '~' && _codes[3] == ';') {
-                  int64_t flag = 0;
-                  if (_codes[4] == '2') {
-                    flag = Key::FLAG_SHIFT;
-                  }
-                  if (_codes[4] == '3') {
-                    flag = Key::FLAG_CTRL;
-                  }
-                  if (_codes[4] == '5') {
-                    flag = Key::FLAG_META;
-                  }
-                  if (_codes[2] == '2') {
-                    emit(InputEvent{{Key::INSERT | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '3') {
-                    emit(InputEvent{{Key::DEL | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '5') {
-                    emit(InputEvent{{Key::PAGE_UP | flag}});
-                    _codes.clear();
-                  }
-                  if (_codes[2] == '6') {
-                    emit(InputEvent{{Key::PAGE_DOWN | flag}});
-                    _codes.clear();
-                  }
-                }
-              }
-              if (_codes.size() == 7) {
-                int64_t flag = 0;
-                if (_codes[6] == '~' && _codes[4] == ';') {
-                  if (_codes[5] == '2') {
-                    flag = Key::FLAG_SHIFT;
-                  }
-                  if (_codes[6] == '3') {
-                    flag = Key::FLAG_CTRL;
-                  }
-                  if (_codes[6] == '4') {
-                    flag = Key::FLAG_META;
-                  }
-                  if (_codes[3] == '1' && _codes[4] == '5') {
-                    emit(InputEvent({Key::F(5) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '1' && _codes[4] == '7') {
-                    emit(InputEvent({Key::F(6) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '1' && _codes[4] == '8') {
-                    emit(InputEvent({Key::F(7) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '1' && _codes[4] == '9') {
-                    emit(InputEvent({Key::F(8) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '2' && _codes[4] == '0') {
-                    emit(InputEvent({Key::F(9) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '2' && _codes[4] == '1') {
-                    emit(InputEvent({Key::F(10) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '2' && _codes[4] == '3') {
-                    emit(InputEvent({Key::F(11) | flag}));
-                    _codes.clear();
-                  }
-                  if (_codes[3] == '2' && _codes[4] == '4') {
-                    emit(InputEvent({Key::F(12) | flag}));
-                    _codes.clear();
-                  }
-                }
-              }
-            }
-            if (_codes.size() == 3 && _codes[1] == 'O' && _codes[2] >= 'P' &&
-                _codes[2] <= 'S') {
-              emit(InputEvent{{Key::F(_codes[2] - 'P' + 1)}});
-              _codes.clear();
-            }
-            if (_codes[2] == '<') {
-              uint32_t btn = 0;
-              int32_t x = 0;
-              int32_t y = 0;
-              _codes.push_back(0);
-              std::string str(_codes.begin(), _codes.end());
-              if (_codes[_codes.size() - 2] == 'm') {
-                sscanf(str.c_str(), "\033[<%d;%d;%dm", &btn, &x, &y);
-                if (btn == 35) {
-                  _mouse.x = x;
-                  _mouse.y = y;
-                } else {
-                  emit(ButtonEvent{btn, false});
-                }
-                _codes.clear();
-              }
-              if (_codes[_codes.size() - 2] == 'M') {
-                sscanf(str.c_str(), "\033[<%d;%d;%dM", &btn, &x, &y);
-                if (btn == 64) {
-                  emit(WheelEvent{true});
-                } else if (btn == 65) {
-                  emit(WheelEvent{true});
-                } else {
-                  emit(ButtonEvent{btn, true});
-                }
-                _codes.clear();
-              }
-            }
           }
-        }
-        if (!_codes.empty()) {
-          emit(InputEvent{_codes});
-          _codes.clear();
         }
       }
       if (ch == -1) {

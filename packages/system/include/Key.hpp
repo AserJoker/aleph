@@ -5,9 +5,9 @@ namespace aleph::system {
 class Key {
 public:
 #ifdef __linux__
-  constexpr static inline auto BUTTON_LEFT = 0x1;
-  constexpr static inline auto BUTTON_WHEEL = 0x2;
-  constexpr static inline auto BUTTON_RIGHT = 0x3;
+  constexpr static inline auto BUTTON_LEFT = 0x0;
+  constexpr static inline auto BUTTON_WHEEL = 0x1;
+  constexpr static inline auto BUTTON_RIGHT = 0x2;
 #else
 #ifdef WIN32
   constexpr static inline auto BUTTON_LEFT = 0x1;
