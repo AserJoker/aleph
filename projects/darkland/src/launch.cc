@@ -4,11 +4,11 @@
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
+#include "system/include/Key.hpp"
 #include "system/include/Terminal.hpp"
 #include "system/include/WheelEvent.hpp"
-#include <clocale>
 #include <cstdio>
-#include <cwchar>
+#include <format>
 #include <string>
 #include <thread>
 #include <vector>
@@ -66,6 +66,22 @@ public:
       _running = false;
       return;
     }
+    for (auto idx = 0; idx < codes.size(); idx++) {
+      str += std::format("0x{:x}", codes[idx] & 0xff);
+      if (codes.size() == 1) {
+        str += std::format(", shift: {}, ctrl :{}, meta:{}",
+                           (codes[idx] & system::KEY::FLAG_SHIFT) != 0,
+                           (codes[idx] & system::KEY::FLAG_CTRL) != 0,
+                           (codes[idx] & system::KEY::FLAG_META) != 0);
+      }
+      if (idx != codes.size() - 1) {
+        str += ",";
+      }
+    }
+    _terminal->move(1, 3);
+    printf("                                                 ");
+    _terminal->move(1, 3);
+    printf("%s", str.c_str());
   }
 
   int run() {

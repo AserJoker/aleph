@@ -1,9 +1,10 @@
 
 
-#include "core/include/Color.hpp"
 #ifdef WIN32
+#include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
+#include "system/include/Key.hpp"
 #include "system/include/Terminal.hpp"
 #include "system/include/WheelEvent.hpp"
 #include <windows.h>
@@ -53,11 +54,60 @@ int64_t Terminal::readInput() {
   HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
   INPUT_RECORD event = {};
   DWORD readnum = 0;
+  int64_t flag = 0;
   if (!ReadConsoleInput(hInput, &event, 1, &readnum)) {
     return -1;
   }
   if (event.EventType == KEY_EVENT && event.Event.KeyEvent.bKeyDown) {
-    return event.Event.KeyEvent.uChar.UnicodeChar;
+    auto keyEvent = event.Event.KeyEvent;
+    if (keyEvent.dwControlKeyState & SHIFT_PRESSED) {
+      flag |= KEY::FLAG_SHIFT;
+    }
+    if (keyEvent.dwControlKeyState & LEFT_CTRL_PRESSED ||
+        keyEvent.dwControlKeyState & RIGHT_CTRL_PRESSED) {
+      flag |= KEY::FLAG_CTRL;
+    }
+    if (keyEvent.dwControlKeyState & LEFT_ALT_PRESSED ||
+        keyEvent.dwControlKeyState & RIGHT_ALT_PRESSED) {
+      flag |= KEY::FLAG_META;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_LEFT) {
+      return flag | KEY::LEFT;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_RIGHT) {
+      return KEY::RIGHT;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_UP) {
+      return flag | KEY::UP;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_DOWN) {
+      return flag | KEY::DOWN;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_INSERT) {
+      return flag | KEY::INSERT;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_DELETE) {
+      return flag | KEY::DEL;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_HOME) {
+      return flag | KEY::HOME;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_END) {
+      return flag | KEY::END;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_PRIOR) {
+      return flag | KEY::PAGE_UP;
+    }
+    if (keyEvent.wVirtualKeyCode == VK_NEXT) {
+      return flag | KEY::PAGE_DOWN;
+    }
+    if (keyEvent.wVirtualKeyCode >= VK_F1 && keyEvent.uChar.UnicodeChar == 0) {
+      return flag | KEY::F(keyEvent.wVirtualKeyCode - VK_F1);
+    }
+    if (keyEvent.uChar.UnicodeChar == 0) {
+      return 0;
+    }
+    return flag | keyEvent.uChar.UnicodeChar;
   } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
     _size.width = event.Event.WindowBufferSizeEvent.dwSize.X;
     _size.height = event.Event.WindowBufferSizeEvent.dwSize.Y;
@@ -101,6 +151,9 @@ void Terminal::parseEvent() {
   auto ch = readInput();
   if (ch == -1 || ch == 0) {
     return;
+  }
+  if (ch == 0x8) {
+    _codes.push_back(0x7f);
   }
   _codes.push_back(ch);
   if (((uint8_t)ch) >> 7 & 1) {

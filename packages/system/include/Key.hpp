@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 namespace aleph::system {
 enum class KEY_RAW {
   ESC = 0x1b,
@@ -39,33 +40,26 @@ enum class KEY_RAW {
   F12 = 0x34,
   EOK = 0x7e,
 };
-enum class KEY {
-  ESC = 0x1b,
-  TAB = 0x9,
-  BACKSPACE = 0x7f,
-  ENTER = 0xd,
-  SPACE = 0x20,
-  UP = 0x80,
-  DOWN,
-  RIGHT,
-  LEFT,
-  INSERT,
-  DEL,
-  HOME,
-  END,
-  PAGE_UP,
-  PAGE_DOWN,
-  F1,
-  F2,
-  F3,
-  F4,
-  F5,
-  F6,
-  F7,
-  F8,
-  F9,
-  F10,
-  F11,
-  F12,
+class KEY {
+public:
+  constexpr static inline auto ESC = 0x1b;
+  constexpr static inline auto TAB = 0x9;
+  constexpr static inline auto BACKSPACE = 0x7f;
+  constexpr static inline auto ENTER = 0xd;
+  constexpr static inline auto SPACE = 0x20;
+  constexpr static inline auto UP = 0x80;
+  constexpr static inline auto DOWN = 0x82;
+  constexpr static inline auto RIGHT = 0x83;
+  constexpr static inline auto LEFT = 0x84;
+  constexpr static inline auto INSERT = 0x85;
+  constexpr static inline auto DEL = 0x86;
+  constexpr static inline auto HOME = 0x87;
+  constexpr static inline auto END = 0x88;
+  constexpr static inline auto PAGE_UP = 0x89;
+  constexpr static inline auto PAGE_DOWN = 0x90;
+  constexpr static inline auto F(int n) { return 0x91 + n; }
+  constexpr static inline int64_t FLAG_SHIFT = 1 << 16;
+  constexpr static inline int64_t FLAG_CTRL = 1 << 17;
+  constexpr static inline int64_t FLAG_META = 1 << 18;
 };
 } // namespace aleph::system
