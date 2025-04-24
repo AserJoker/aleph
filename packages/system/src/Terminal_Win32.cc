@@ -1,5 +1,6 @@
 
 
+#include "system/include/ResizeEvent.hpp"
 #ifdef WIN32
 #include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -118,8 +119,13 @@ int64_t Terminal::readInput() {
     flag &= ~Key::FLAG_SHIFT;
     return flag | keyEvent.uChar.UnicodeChar;
   } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
-    _size.width = event.Event.WindowBufferSizeEvent.dwSize.X;
-    _size.height = event.Event.WindowBufferSizeEvent.dwSize.Y;
+    auto sizeEvent = event.Event.WindowBufferSizeEvent;
+    if (_size.width != sizeEvent.dwSize.X ||
+        _size.height != sizeEvent.dwSize.Y) {
+      _size.width = sizeEvent.dwSize.X;
+      _size.height = sizeEvent.dwSize.Y;
+      emit<ResizeEvent>(_size);
+    }
   } else if (event.EventType == MOUSE_EVENT) {
     _mouse.x = event.Event.MouseEvent.dwMousePosition.X;
     _mouse.y = event.Event.MouseEvent.dwMousePosition.Y;
