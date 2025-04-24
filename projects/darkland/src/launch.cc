@@ -85,9 +85,10 @@ public:
                            (codes[idx] & system::Key::FLAG_META) != 0);
       }
     }
-    _terminal->move(1, 4);
-    printf("                                                 ");
-    _terminal->move(1, 4);
+    // _terminal->move(1, 4);
+    // printf("                                                 ");
+    static auto y = 3;
+    _terminal->move(1, y++);
     printf("%s", str.c_str());
   }
 
@@ -97,6 +98,10 @@ public:
     _terminal->setMouse(true);
     _terminal->setCursor(false);
     _terminal->clear();
+    _terminal->present();
+    _terminal->move(1, 5);
+    // const char *str = "\u4e2d";
+    // printf("\u4e2d");
     _terminal->present();
     while (_running) {
       auto &size = _terminal->getSize();

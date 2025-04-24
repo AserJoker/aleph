@@ -1,4 +1,5 @@
-#include <vector>
+
+#include <clocale>
 #ifdef __linux__
 #include "core/include/Size.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -11,6 +12,7 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
+#include <vector>
 
 using namespace aleph;
 using namespace aleph::system;
@@ -23,6 +25,7 @@ static winsize g_terminalSize = {};
 void onResize(int) { ioctl(STDOUT_FILENO, TIOCGWINSZ, &g_terminalSize); }
 
 void Terminal::setup() {
+  setlocale(LC_ALL, "");
   signal(SIGWINCH, &onResize);
   tcgetattr(STDIN_FILENO, &g_origin);
   auto current = g_origin;
@@ -352,19 +355,19 @@ void Terminal::parseEvent() {
     }
     return;
   }
-  _codes.push_back(ch);
+  std::vector<int64_t> codes;
+  codes.push_back(ch);
   if (((uint8_t)ch) >> 7 & 1) {
     for (int8_t index = 0; index < 6; index++) {
       if (((((uint8_t)ch) >> ((6 - index)) & 1) & 0xf)) {
         auto next = readInput();
-        _codes.push_back(next);
+        codes.push_back(next);
       } else {
         break;
       }
     }
   }
-  emit(InputEvent{_codes});
-  _codes.clear();
+  emit(InputEvent{codes});
 }
 
 void Terminal::pollEvent() {
