@@ -78,9 +78,8 @@ public:
       } else {
         str += system::Key::name(ch);
       }
-      str += ", ";
       if (codes.size() == 1) {
-        str += std::format("shift: {}, ctrl: {}, meta: {}",
+        str += std::format(", shift: {}, ctrl: {}, meta: {}",
                            (codes[idx] & system::Key::FLAG_SHIFT) != 0,
                            (codes[idx] & system::Key::FLAG_CTRL) != 0 || ctrl,
                            (codes[idx] & system::Key::FLAG_META) != 0);

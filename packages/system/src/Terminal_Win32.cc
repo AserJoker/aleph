@@ -1,11 +1,11 @@
 
 
-#include "system/include/ResizeEvent.hpp"
 #ifdef WIN32
 #include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
 #include "system/include/Key.hpp"
+#include "system/include/ResizeEvent.hpp"
 #include "system/include/Terminal.hpp"
 #include "system/include/WheelEvent.hpp"
 #include <windows.h>
@@ -58,7 +58,7 @@ int64_t Terminal::readInput() {
   DWORD readnum = 0;
   int64_t flag = 0;
   if (!ReadConsoleInput(hInput, &event, 1, &readnum)) {
-    return -1;
+    return Key::ERR;
   }
   if (event.EventType == KEY_EVENT && event.Event.KeyEvent.bKeyDown) {
     auto keyEvent = event.Event.KeyEvent;
@@ -159,12 +159,12 @@ int64_t Terminal::readInput() {
       }
     }
   }
-  return -1;
+  return Key::ERR;
 }
 
 void Terminal::parseEvent() {
   auto ch = readInput();
-  if (ch == -1 || ch == 0) {
+  if (ch == Key::ERR || ch == 0) {
     return;
   }
   if (ch == 0x8) {
@@ -175,7 +175,7 @@ void Terminal::parseEvent() {
     for (int8_t index = 0; index < 6; index++) {
       if (((((uint8_t)ch) >> ((6 - index)) & 1) & 0xf)) {
         auto next = readInput();
-        if (next == -1) {
+        if (next == Key::ERR) {
           break;
         }
         if (next == 0) {

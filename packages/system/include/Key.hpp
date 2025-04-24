@@ -15,6 +15,7 @@ public:
   constexpr static inline auto BUTTON_RIGHT = 0x2;
 #endif
 #endif
+  constexpr static inline auto ERR = -1;
   constexpr static inline auto ESC = 0x1b;
   constexpr static inline auto TAB = 0x9;
   constexpr static inline auto BACKSPACE = 0x7f;
