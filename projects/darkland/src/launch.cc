@@ -45,7 +45,7 @@ public:
           idx++;
         }
       }
-    } else if (event.getButton() == 1) {
+    } else if (event.getButton() == system::Key::BUTTON_RIGHT) {
       _running = false;
     }
     _terminal->move(1, 3);
