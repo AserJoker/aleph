@@ -1,5 +1,6 @@
 
 
+#include <stdio.h>
 #ifdef WIN32
 #include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -76,7 +77,7 @@ int64_t Terminal::readInput() {
       return flag | KEY::LEFT;
     }
     if (keyEvent.wVirtualKeyCode == VK_RIGHT) {
-      return KEY::RIGHT;
+      return flag| KEY::RIGHT;
     }
     if (keyEvent.wVirtualKeyCode == VK_UP) {
       return flag | KEY::UP;
@@ -102,12 +103,19 @@ int64_t Terminal::readInput() {
     if (keyEvent.wVirtualKeyCode == VK_NEXT) {
       return flag | KEY::PAGE_DOWN;
     }
-    if (keyEvent.wVirtualKeyCode >= VK_F1 && keyEvent.uChar.UnicodeChar == 0) {
+    if (keyEvent.wVirtualKeyCode == VK_OEM_2) {
+        if (flag & KEY::FLAG_SHIFT) {
+            return '?';
+        }
+        return flag | '/';
+    }
+    if (keyEvent.wVirtualKeyCode >= VK_F1 && keyEvent.wVirtualKeyCode <= VK_F12) {
       return flag | KEY::F(keyEvent.wVirtualKeyCode - VK_F1 + 1);
     }
     if (keyEvent.uChar.UnicodeChar == 0) {
       return 0;
     }
+    flag &= ~KEY::FLAG_SHIFT;
     return flag | keyEvent.uChar.UnicodeChar;
   } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
     _size.width = event.Event.WindowBufferSizeEvent.dwSize.X;
@@ -161,6 +169,12 @@ void Terminal::parseEvent() {
     for (int8_t index = 0; index < 6; index++) {
       if (((((uint8_t)ch) >> ((6 - index)) & 1) & 0xf)) {
         auto next = readInput();
+        if (next == -1) {
+            break;
+        }
+        if (next == 0) {
+            continue;
+        }
         _codes.push_back(next);
       } else {
         break;
@@ -188,7 +202,7 @@ void Terminal::pollEvent() {
   }
 }
 
-void Terminal::present() { fflush(STDIN_FILENO); }
+void Terminal::present() { fflush(stdout); }
 
 void Terminal::move(int32_t x, int32_t y) { printf("\033[%d;%dH", y, x); }
 

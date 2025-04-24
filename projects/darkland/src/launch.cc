@@ -71,30 +71,21 @@ public:
       return;
     }
     for (auto idx = 0; idx < codes.size(); idx++) {
-      auto ch = (char)(codes[idx] & 0xff);
-      if (ch == system::KEY::ESC) {
-        str += "<ESC>";
-      } else if (ch == system::KEY::TAB) {
-        str += "<TAB>";
-      } else if (ch == system::KEY::BACKSPACE) {
-        str += "<BACKSPACE>";
-      } else if (ch == system::KEY::SPACE) {
-        str += "<SPACE>";
-      } else if (ch >= 0x20 && ch < 0x7f) {
-        str += ch;
+      auto ch = (uint8_t)(codes[idx] & 0xff);
+      bool ctrl = false;
+      if (ch < 0x20) {
+        str += system::KEY::KEYNAME(ch + 0x40);
+        ctrl = true;
       } else {
-        str += std::format("0x{:x}", ch);
+        str += system::KEY::KEYNAME(ch);
       }
-      // str += std::format("0x{:x}", codes[idx] & 0xff);
+      str += ", ";
       if (codes.size() == 1) {
-        str += std::format(", shift: {}, ctrl: {}, meta: {}",
+        str += std::format("shift: {}, ctrl: {}, meta: {}",
                            (codes[idx] & system::KEY::FLAG_SHIFT) != 0,
-                           (codes[idx] & system::KEY::FLAG_CTRL) != 0,
+                           (codes[idx] & system::KEY::FLAG_CTRL) != 0 || ctrl,
                            (codes[idx] & system::KEY::FLAG_META) != 0);
       }
-      // if (idx != codes.size() - 1) {
-      //   str += ",";
-      // }
     }
     _terminal->move(1, 4);
     printf("                                                 ");

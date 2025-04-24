@@ -1,3 +1,4 @@
+#ifdef __linux__
 #include "system/include/Terminal.hpp"
 #include "core/include/Size.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -5,8 +6,6 @@
 #include "system/include/Key.hpp"
 #include "system/include/ResizeEvent.hpp"
 #include "system/include/WheelEvent.hpp"
-
-#ifdef __linux__
 #include <csignal>
 #include <sys/ioctl.h>
 #include <termios.h>
