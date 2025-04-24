@@ -18,7 +18,7 @@
 
 using namespace aleph;
 using namespace aleph::system;
-Terminal::Terminal() : _mouseStatus(0) {}
+Terminal::Terminal() {}
 
 static DWORD oldInputMode = 0;
 static DWORD oldOutputMode = 0;
@@ -51,6 +51,7 @@ void Terminal::cleanup() {
 }
 
 int64_t Terminal::readInput() {
+  static uint32_t mouseStatus = 0;
   HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
   INPUT_RECORD event = {};
   DWORD readnum = 0;
@@ -102,7 +103,7 @@ int64_t Terminal::readInput() {
       return flag | KEY::PAGE_DOWN;
     }
     if (keyEvent.wVirtualKeyCode >= VK_F1 && keyEvent.uChar.UnicodeChar == 0) {
-      return flag | KEY::F(keyEvent.wVirtualKeyCode - VK_F1);
+      return flag | KEY::F(keyEvent.wVirtualKeyCode - VK_F1 + 1);
     }
     if (keyEvent.uChar.UnicodeChar == 0) {
       return 0;
@@ -125,13 +126,13 @@ int64_t Terminal::readInput() {
         uint32_t flag = 1 << idx;
         auto button = event.Event.MouseEvent.dwButtonState & flag;
         if (button) {
-          if (!(_mouseStatus & flag)) {
-            _mouseStatus |= flag;
+          if (!(mouseStatus & flag)) {
+            mouseStatus |= flag;
             emit(ButtonEvent{idx, true, shift, control, alt});
           }
         } else {
-          if (_mouseStatus & (flag)) {
-            _mouseStatus &= ~(flag);
+          if (mouseStatus & (flag)) {
+            mouseStatus &= ~(flag);
             emit(ButtonEvent{idx, false, shift, control, alt});
           }
         }

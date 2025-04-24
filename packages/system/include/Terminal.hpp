@@ -13,8 +13,6 @@ private:
 
   core::Point _mouse;
 
-  uint32_t _mouseStatus;
-
   std::vector<int64_t> _codes;
 
   int64_t readInput();

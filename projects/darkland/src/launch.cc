@@ -45,7 +45,7 @@ public:
           idx++;
         }
       }
-      _terminal->move(1, 2);
+      _terminal->move(1, 3);
       _terminal->setNormal();
       _terminal->setColor(core::Color{0x1cfff});
       printf("hello world");
@@ -66,21 +66,39 @@ public:
       _running = false;
       return;
     }
+    if (codes[0] == 'r') {
+      _terminal->clear();
+      return;
+    }
     for (auto idx = 0; idx < codes.size(); idx++) {
-      str += std::format("0x{:x}", codes[idx] & 0xff);
+      auto ch = (char)(codes[idx] & 0xff);
+      if (ch == system::KEY::ESC) {
+        str += "<ESC>";
+      } else if (ch == system::KEY::TAB) {
+        str += "<TAB>";
+      } else if (ch == system::KEY::BACKSPACE) {
+        str += "<BACKSPACE>";
+      } else if (ch == system::KEY::SPACE) {
+        str += "<SPACE>";
+      } else if (ch >= 0x20 && ch < 0x7f) {
+        str += ch;
+      } else {
+        str += std::format("0x{:x}", ch);
+      }
+      // str += std::format("0x{:x}", codes[idx] & 0xff);
       if (codes.size() == 1) {
-        str += std::format(", shift: {}, ctrl :{}, meta:{}",
+        str += std::format(", shift: {}, ctrl: {}, meta: {}",
                            (codes[idx] & system::KEY::FLAG_SHIFT) != 0,
                            (codes[idx] & system::KEY::FLAG_CTRL) != 0,
                            (codes[idx] & system::KEY::FLAG_META) != 0);
       }
-      if (idx != codes.size() - 1) {
-        str += ",";
-      }
+      // if (idx != codes.size() - 1) {
+      //   str += ",";
+      // }
     }
-    _terminal->move(1, 3);
+    _terminal->move(1, 4);
     printf("                                                 ");
-    _terminal->move(1, 3);
+    _terminal->move(1, 4);
     printf("%s", str.c_str());
   }
 
@@ -92,10 +110,14 @@ public:
     _terminal->clear();
     _terminal->present();
     while (_running) {
-      auto size = _terminal->getSize();
+      auto &size = _terminal->getSize();
       _terminal->move(1, 1);
       _terminal->setNormal();
       printf("%d,%d", size.width, size.height);
+      _terminal->move(1, 2);
+      _terminal->setNormal();
+      auto &mouse = _terminal->getMousePosition();
+      printf("%d,%d", mouse.x, mouse.y);
       using namespace std::chrono;
       _terminal->pollEvent();
       _terminal->present();
@@ -105,8 +127,8 @@ public:
     _terminal->setNormal();
     _terminal->clear();
     _terminal->present();
-    _terminal->setCursor(true);
     _terminal->setMouse(false);
+    _terminal->setCursor(true);
     _terminal->cleanup();
     return 0;
   }
