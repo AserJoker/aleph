@@ -55,71 +55,71 @@ void Terminal::parseEvent() {
     return;
   }
   if (ch == 0) {
-    _codes.push_back(KEY::SPACE | KEY::FLAG_CTRL);
+    _codes.push_back(Key::SPACE | Key::FLAG_CTRL);
     return;
   }
   if (ch == 0x1f) {
-    _codes.push_back('/' | KEY::FLAG_CTRL);
+    _codes.push_back('/' | Key::FLAG_CTRL);
     return;
   }
-  if (ch == KEY::ESC) {
+  if (ch == Key::ESC) {
     while (true) {
-      if (!_codes.empty() && (ch == -1 || ch == KEY::ESC)) {
-        if (_codes[0] == KEY::ESC) {
+      if (!_codes.empty() && (ch == -1 || ch == Key::ESC)) {
+        if (_codes[0] == Key::ESC) {
           if (_codes.size() == 1) {
             emit(InputEvent{_codes});
             _codes.clear();
           } else if (_codes.size() == 2) {
-            emit(InputEvent{{_codes[1] | KEY::FLAG_META}}); // ^{x}
+            emit(InputEvent{{_codes[1] | Key::FLAG_META}}); // ^{x}
             _codes.clear();
           } else {
             if (_codes[1] == '[') {
               if (_codes.size() == 3) {
                 if (_codes[2] == 'A') {
-                  emit({InputEvent{{KEY::UP}}}); // ESC[A
+                  emit({InputEvent{{Key::UP}}}); // ESC[A
                   _codes.clear();
                 }
                 if (_codes[2] == 'B') {
-                  emit({InputEvent{{KEY::DOWN}}});
+                  emit({InputEvent{{Key::DOWN}}});
                   _codes.clear();
                 }
                 if (_codes[2] == 'C') {
-                  emit({InputEvent{{KEY::RIGHT}}});
+                  emit({InputEvent{{Key::RIGHT}}});
                   _codes.clear();
                 }
                 if (_codes[2] == 'D') {
-                  emit({InputEvent{{KEY::LEFT}}});
+                  emit({InputEvent{{Key::LEFT}}});
                   _codes.clear();
                 }
                 if (_codes[2] == 'F') {
-                  emit({InputEvent{{KEY::END}}});
+                  emit({InputEvent{{Key::END}}});
                   _codes.clear();
                 }
                 if (_codes[2] == 'H') {
-                  emit({InputEvent{{KEY::HOME}}});
+                  emit({InputEvent{{Key::HOME}}});
                   _codes.clear();
                 }
                 if (_codes[2] == 'Z') {
-                  emit({InputEvent{{KEY::TAB | KEY::FLAG_SHIFT}}});
+                  emit({InputEvent{{Key::TAB | Key::FLAG_SHIFT}}});
                   _codes.clear();
                 }
               }
               if (_codes.size() == 4) {
                 if (_codes[3] == '~') {
                   if (_codes[2] == '2') {
-                    emit(InputEvent{{KEY::INSERT}}); // ESC[2~
+                    emit(InputEvent{{Key::INSERT}}); // ESC[2~
                     _codes.clear();
                   }
                   if (_codes[2] == '3') {
-                    emit(InputEvent{{KEY::DEL}});
+                    emit(InputEvent{{Key::DEL}});
                     _codes.clear();
                   }
                   if (_codes[2] == '5') {
-                    emit(InputEvent{{KEY::PAGE_UP}});
+                    emit(InputEvent{{Key::PAGE_UP}});
                     _codes.clear();
                   }
                   if (_codes[2] == '6') {
-                    emit(InputEvent{{KEY::PAGE_DOWN}});
+                    emit(InputEvent{{Key::PAGE_DOWN}});
                     _codes.clear();
                   }
                 }
@@ -127,35 +127,35 @@ void Terminal::parseEvent() {
               if (_codes.size() == 5) {
                 if (_codes[4] == '~') {
                   if (_codes[2] == '1' && _codes[3] == '5') {
-                    emit(InputEvent({KEY::F(5)}));
+                    emit(InputEvent({Key::F(5)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '1' && _codes[3] == '7') {
-                    emit(InputEvent({KEY::F(6)}));
+                    emit(InputEvent({Key::F(6)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '1' && _codes[3] == '8') {
-                    emit(InputEvent({KEY::F(7)}));
+                    emit(InputEvent({Key::F(7)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '1' && _codes[3] == '9') {
-                    emit(InputEvent({KEY::F(8)}));
+                    emit(InputEvent({Key::F(8)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '2' && _codes[3] == '0') {
-                    emit(InputEvent({KEY::F(9)}));
+                    emit(InputEvent({Key::F(9)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '2' && _codes[3] == '1') {
-                    emit(InputEvent({KEY::F(10)}));
+                    emit(InputEvent({Key::F(10)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '2' && _codes[3] == '3') {
-                    emit(InputEvent({KEY::F(11)}));
+                    emit(InputEvent({Key::F(11)}));
                     _codes.clear();
                   }
                   if (_codes[2] == '2' && _codes[3] == '4') {
-                    emit(InputEvent({KEY::F(12)}));
+                    emit(InputEvent({Key::F(12)}));
                     _codes.clear();
                   }
                 }
@@ -164,68 +164,68 @@ void Terminal::parseEvent() {
                 if (_codes[2] == '1' && _codes[3] == ';') {
                   int64_t flag = 0;
                   if (_codes[4] == '2') {
-                    flag = KEY::FLAG_SHIFT;
+                    flag = Key::FLAG_SHIFT;
                   }
                   if (_codes[4] == '3') {
-                    flag = KEY::FLAG_CTRL;
+                    flag = Key::FLAG_CTRL;
                   }
                   if (_codes[4] == '5') {
-                    flag = KEY::FLAG_META;
+                    flag = Key::FLAG_META;
                   }
                   if (_codes[5] == 'A') {
-                    emit(InputEvent{{KEY::UP | flag}}); // ESC[1;2A
+                    emit(InputEvent{{Key::UP | flag}}); // ESC[1;2A
                     _codes.clear();
                   }
                   if (_codes[5] == 'B') {
-                    emit(InputEvent{{KEY::DOWN | flag}});
+                    emit(InputEvent{{Key::DOWN | flag}});
                     _codes.clear();
                   }
                   if (_codes[5] == 'C') {
-                    emit(InputEvent{{KEY::RIGHT | flag}});
+                    emit(InputEvent{{Key::RIGHT | flag}});
                     _codes.clear();
                   }
                   if (_codes[5] == 'D') {
-                    emit(InputEvent{{KEY::LEFT | flag}});
+                    emit(InputEvent{{Key::LEFT | flag}});
                     _codes.clear();
                   }
                   if (_codes[5] == 'F') {
-                    emit(InputEvent{{KEY::END | flag}});
+                    emit(InputEvent{{Key::END | flag}});
                     _codes.clear();
                   }
                   if (_codes[5] == 'H') {
-                    emit(InputEvent{{KEY::HOME | flag}});
+                    emit(InputEvent{{Key::HOME | flag}});
                     _codes.clear();
                   }
                   if (_codes[5] >= 'P' && _codes[5] <= 'S') {
-                    emit(InputEvent{{KEY::F(_codes[5] - 'P' + 1) | flag}});
+                    emit(InputEvent{{Key::F(_codes[5] - 'P' + 1) | flag}});
                     _codes.clear();
                   }
                 }
                 if (_codes[5] == '~' && _codes[3] == ';') {
                   int64_t flag = 0;
                   if (_codes[4] == '2') {
-                    flag = KEY::FLAG_SHIFT;
+                    flag = Key::FLAG_SHIFT;
                   }
                   if (_codes[4] == '3') {
-                    flag = KEY::FLAG_CTRL;
+                    flag = Key::FLAG_CTRL;
                   }
                   if (_codes[4] == '5') {
-                    flag = KEY::FLAG_META;
+                    flag = Key::FLAG_META;
                   }
                   if (_codes[2] == '2') {
-                    emit(InputEvent{{KEY::INSERT | flag}});
+                    emit(InputEvent{{Key::INSERT | flag}});
                     _codes.clear();
                   }
                   if (_codes[2] == '3') {
-                    emit(InputEvent{{KEY::DEL | flag}});
+                    emit(InputEvent{{Key::DEL | flag}});
                     _codes.clear();
                   }
                   if (_codes[2] == '5') {
-                    emit(InputEvent{{KEY::PAGE_UP | flag}});
+                    emit(InputEvent{{Key::PAGE_UP | flag}});
                     _codes.clear();
                   }
                   if (_codes[2] == '6') {
-                    emit(InputEvent{{KEY::PAGE_DOWN | flag}});
+                    emit(InputEvent{{Key::PAGE_DOWN | flag}});
                     _codes.clear();
                   }
                 }
@@ -234,44 +234,44 @@ void Terminal::parseEvent() {
                 int64_t flag = 0;
                 if (_codes[6] == '~' && _codes[4] == ';') {
                   if (_codes[5] == '2') {
-                    flag = KEY::FLAG_SHIFT;
+                    flag = Key::FLAG_SHIFT;
                   }
                   if (_codes[6] == '3') {
-                    flag = KEY::FLAG_CTRL;
+                    flag = Key::FLAG_CTRL;
                   }
                   if (_codes[6] == '4') {
-                    flag = KEY::FLAG_META;
+                    flag = Key::FLAG_META;
                   }
                   if (_codes[3] == '1' && _codes[4] == '5') {
-                    emit(InputEvent({KEY::F(5) | flag}));
+                    emit(InputEvent({Key::F(5) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '1' && _codes[4] == '7') {
-                    emit(InputEvent({KEY::F(6) | flag}));
+                    emit(InputEvent({Key::F(6) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '1' && _codes[4] == '8') {
-                    emit(InputEvent({KEY::F(7) | flag}));
+                    emit(InputEvent({Key::F(7) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '1' && _codes[4] == '9') {
-                    emit(InputEvent({KEY::F(8) | flag}));
+                    emit(InputEvent({Key::F(8) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '2' && _codes[4] == '0') {
-                    emit(InputEvent({KEY::F(9) | flag}));
+                    emit(InputEvent({Key::F(9) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '2' && _codes[4] == '1') {
-                    emit(InputEvent({KEY::F(10) | flag}));
+                    emit(InputEvent({Key::F(10) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '2' && _codes[4] == '3') {
-                    emit(InputEvent({KEY::F(11) | flag}));
+                    emit(InputEvent({Key::F(11) | flag}));
                     _codes.clear();
                   }
                   if (_codes[3] == '2' && _codes[4] == '4') {
-                    emit(InputEvent({KEY::F(12) | flag}));
+                    emit(InputEvent({Key::F(12) | flag}));
                     _codes.clear();
                   }
                 }
@@ -279,7 +279,7 @@ void Terminal::parseEvent() {
             }
             if (_codes.size() == 3 && _codes[1] == 'O' && _codes[2] >= 'P' &&
                 _codes[2] <= 'S') {
-              emit(InputEvent{{KEY::F(_codes[2] - 'P' + 1)}});
+              emit(InputEvent{{Key::F(_codes[2] - 'P' + 1)}});
               _codes.clear();
             }
             if (_codes[2] == '<') {

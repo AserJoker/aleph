@@ -2,8 +2,19 @@
 #include <cstdint>
 #include <format>
 namespace aleph::system {
-class KEY {
+class Key {
 public:
+#ifdef __linux__
+  constexpr static inline auto BUTTON_LEFT = 0x1;
+  constexpr static inline auto BUTTON_WHEEL = 0x2;
+  constexpr static inline auto BUTTON_RIGHT = 0x3;
+#else
+#ifdef WIN32
+  constexpr static inline auto BUTTON_LEFT = 0x1;
+  constexpr static inline auto BUTTON_WHEEL = 0x3;
+  constexpr static inline auto BUTTON_RIGHT = 0x2;
+#endif
+#endif
   constexpr static inline auto ESC = 0x1b;
   constexpr static inline auto TAB = 0x9;
   constexpr static inline auto BACKSPACE = 0x7f;
@@ -25,7 +36,7 @@ public:
   constexpr static inline int64_t FLAG_META = 1 << 18;
   constexpr static inline auto CTRL(char key) { return key - 'a' + 0x1; }
 
-  constexpr static inline auto KEYNAME(int64_t key) {
+  constexpr static inline auto name(int64_t key) {
     if (key <= 0x7f) {
       return std::string{(char)(key & 0xff)};
     } else if (key == ESC) {

@@ -1,6 +1,5 @@
 
 
-#include <stdio.h>
 #ifdef WIN32
 #include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -63,59 +62,60 @@ int64_t Terminal::readInput() {
   if (event.EventType == KEY_EVENT && event.Event.KeyEvent.bKeyDown) {
     auto keyEvent = event.Event.KeyEvent;
     if (keyEvent.dwControlKeyState & SHIFT_PRESSED) {
-      flag |= KEY::FLAG_SHIFT;
+      flag |= Key::FLAG_SHIFT;
     }
     if (keyEvent.dwControlKeyState & LEFT_CTRL_PRESSED ||
         keyEvent.dwControlKeyState & RIGHT_CTRL_PRESSED) {
-      flag |= KEY::FLAG_CTRL;
+      flag |= Key::FLAG_CTRL;
     }
     if (keyEvent.dwControlKeyState & LEFT_ALT_PRESSED ||
         keyEvent.dwControlKeyState & RIGHT_ALT_PRESSED) {
-      flag |= KEY::FLAG_META;
+      flag |= Key::FLAG_META;
     }
     if (keyEvent.wVirtualKeyCode == VK_LEFT) {
-      return flag | KEY::LEFT;
+      return flag | Key::LEFT;
     }
     if (keyEvent.wVirtualKeyCode == VK_RIGHT) {
-      return flag| KEY::RIGHT;
+      return flag | Key::RIGHT;
     }
     if (keyEvent.wVirtualKeyCode == VK_UP) {
-      return flag | KEY::UP;
+      return flag | Key::UP;
     }
     if (keyEvent.wVirtualKeyCode == VK_DOWN) {
-      return flag | KEY::DOWN;
+      return flag | Key::DOWN;
     }
     if (keyEvent.wVirtualKeyCode == VK_INSERT) {
-      return flag | KEY::INSERT;
+      return flag | Key::INSERT;
     }
     if (keyEvent.wVirtualKeyCode == VK_DELETE) {
-      return flag | KEY::DEL;
+      return flag | Key::DEL;
     }
     if (keyEvent.wVirtualKeyCode == VK_HOME) {
-      return flag | KEY::HOME;
+      return flag | Key::HOME;
     }
     if (keyEvent.wVirtualKeyCode == VK_END) {
-      return flag | KEY::END;
+      return flag | Key::END;
     }
     if (keyEvent.wVirtualKeyCode == VK_PRIOR) {
-      return flag | KEY::PAGE_UP;
+      return flag | Key::PAGE_UP;
     }
     if (keyEvent.wVirtualKeyCode == VK_NEXT) {
-      return flag | KEY::PAGE_DOWN;
+      return flag | Key::PAGE_DOWN;
     }
     if (keyEvent.wVirtualKeyCode == VK_OEM_2) {
-        if (flag & KEY::FLAG_SHIFT) {
-            return '?';
-        }
-        return flag | '/';
+      if (flag & Key::FLAG_SHIFT) {
+        return '?';
+      }
+      return flag | '/';
     }
-    if (keyEvent.wVirtualKeyCode >= VK_F1 && keyEvent.wVirtualKeyCode <= VK_F12) {
-      return flag | KEY::F(keyEvent.wVirtualKeyCode - VK_F1 + 1);
+    if (keyEvent.wVirtualKeyCode >= VK_F1 &&
+        keyEvent.wVirtualKeyCode <= VK_F12) {
+      return flag | Key::F(keyEvent.wVirtualKeyCode - VK_F1 + 1);
     }
     if (keyEvent.uChar.UnicodeChar == 0) {
       return 0;
     }
-    flag &= ~KEY::FLAG_SHIFT;
+    flag &= ~Key::FLAG_SHIFT;
     return flag | keyEvent.uChar.UnicodeChar;
   } else if (event.EventType == WINDOW_BUFFER_SIZE_EVENT) {
     _size.width = event.Event.WindowBufferSizeEvent.dwSize.X;
@@ -139,8 +139,8 @@ int64_t Terminal::readInput() {
             emit(ButtonEvent{idx, true, shift, control, alt});
           }
         } else {
-          if (mouseStatus & (flag)) {
-            mouseStatus &= ~(flag);
+          if (mouseStatus & flag) {
+            mouseStatus &= ~flag;
             emit(ButtonEvent{idx, false, shift, control, alt});
           }
         }
@@ -170,10 +170,10 @@ void Terminal::parseEvent() {
       if (((((uint8_t)ch) >> ((6 - index)) & 1) & 0xf)) {
         auto next = readInput();
         if (next == -1) {
-            break;
+          break;
         }
         if (next == 0) {
-            continue;
+          continue;
         }
         _codes.push_back(next);
       } else {

@@ -45,16 +45,15 @@ public:
           idx++;
         }
       }
-      _terminal->move(1, 3);
-      _terminal->setNormal();
-      _terminal->setColor(core::Color{0x1cfff});
-      printf("hello world");
-      _terminal->setNormal();
-      _terminal->present();
     } else if (event.getButton() == 1) {
-      _terminal->setPalette(16, 0xffffff);
-      _terminal->present();
+      _running = false;
     }
+    _terminal->move(1, 3);
+    _terminal->setNormal();
+    _terminal->setColor(core::Color{0x1cfff});
+    printf("button: %d", event.getButton());
+    _terminal->setNormal();
+    _terminal->present();
   }
 
   void onWheel(Object *, const system::WheelEvent &event) {}
@@ -74,17 +73,17 @@ public:
       auto ch = (uint8_t)(codes[idx] & 0xff);
       bool ctrl = false;
       if (ch < 0x20) {
-        str += system::KEY::KEYNAME(ch + 0x40);
+        str += system::Key::name(ch + 0x40);
         ctrl = true;
       } else {
-        str += system::KEY::KEYNAME(ch);
+        str += system::Key::name(ch);
       }
       str += ", ";
       if (codes.size() == 1) {
         str += std::format("shift: {}, ctrl: {}, meta: {}",
-                           (codes[idx] & system::KEY::FLAG_SHIFT) != 0,
-                           (codes[idx] & system::KEY::FLAG_CTRL) != 0 || ctrl,
-                           (codes[idx] & system::KEY::FLAG_META) != 0);
+                           (codes[idx] & system::Key::FLAG_SHIFT) != 0,
+                           (codes[idx] & system::Key::FLAG_CTRL) != 0 || ctrl,
+                           (codes[idx] & system::Key::FLAG_META) != 0);
       }
     }
     _terminal->move(1, 4);
