@@ -2,6 +2,7 @@
 #include "core/include/Co.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
+#include "core/include/Task.hpp"
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
 #include "system/include/Key.hpp"
@@ -96,9 +97,9 @@ int main(int argc, char *argv[]) {
   // Application app;
   // return app.run();
   core::Co::setup();
-  core::Co::create(fn1);
-  core::Co::create(fn2);
-  core::Co::create(fn3);
+  core::Co::create(new core::FunctionalTask(fn1));
+  core::Co::create(new core::FunctionalTask(fn2));
+  core::Co::create(new core::FunctionalTask(fn3));
   while (!core::Co::ready()) {
     core::Co::yield();
   }

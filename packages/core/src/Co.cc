@@ -1,3 +1,4 @@
+#ifdef __linux__
 #include "core/include/Co.hpp"
 #include <cstdint>
 #include <ucontext.h>
@@ -8,7 +9,7 @@ using namespace aleph::core;
 struct Coroutine {
   uint8_t stack[CO_STACK_SIZE];
   ucontext_t ctx;
-  void (*entry)();
+  AutoPtr<Task> task;
   bool running;
 };
 
@@ -17,7 +18,7 @@ static size_t current = 0;
 
 static void onCoroutine(void *parameter) {
   auto ctx = (Coroutine *)parameter;
-  ctx->entry();
+  ctx->task->run();
   ctx->running = false;
   Co::yield();
 }
@@ -47,13 +48,14 @@ void Co::yield() {
 
 bool Co::ready() { return coroutines.size() == 1; }
 
-void Co::create(void (*entry)()) {
+void Co::create(const AutoPtr<Task> &task) {
   coroutines.push_back({});
   auto ctx = &*coroutines.rbegin();
   getcontext(&ctx->ctx);
   ctx->ctx.uc_stack.ss_sp = ctx->stack;
   ctx->ctx.uc_stack.ss_size = CO_STACK_SIZE;
   ctx->running = true;
-  ctx->entry = entry;
+  ctx->task = task;
   makecontext(&ctx->ctx, (void (*)())onCoroutine, 1, ctx);
 }
+#endif

@@ -1,4 +1,6 @@
 #pragma once
+#include "core/include/AutoPtr.hpp"
+#include "core/include/Task.hpp"
 #ifndef CO_STACK_SIZE
 #define CO_STACK_SIZE 4096
 #endif
@@ -13,6 +15,6 @@ public:
 
   static bool ready();
 
-  static void create(void (*entry)());
+  static void create(const AutoPtr<Task> &task);
 };
 } // namespace aleph::core
