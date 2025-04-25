@@ -1,15 +1,12 @@
 #pragma once
-#include <string>
 namespace aleph::core {
 class EventBase {
-private:
-  std::string _type;
 
 public:
-  EventBase(const std::string &type);
+  EventBase();
 
   virtual ~EventBase() = default;
 
-  const std::string &getType() const;
+  virtual const char *getType() const;
 };
 } // namespace aleph::core

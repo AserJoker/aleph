@@ -11,7 +11,5 @@ public:
   InputEvent(const std::vector<int64_t> &codes);
 
   const std::vector<int64_t> &getCodes() const;
-
-  static inline constexpr auto TYPE = "system.input";
 };
 }; // namespace aleph::system

@@ -10,7 +10,5 @@ public:
   ResizeEvent(const core::Size &size);
 
   const core::Size &getSize() const;
-
-  constexpr static inline auto TYPE = "system.resize";
 };
 } // namespace aleph::system

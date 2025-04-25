@@ -9,7 +9,5 @@ public:
   WheelEvent(bool direction);
 
   bool getDirection() const;
-
-  static inline constexpr auto TYPE = "system.wheel";
 };
 }; // namespace aleph::system

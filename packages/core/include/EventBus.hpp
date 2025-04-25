@@ -2,6 +2,7 @@
 #include "EventBase.hpp"
 #include "ObjectBase.hpp"
 #include <string>
+#include <typeinfo>
 #include <vector>
 namespace aleph::core {
 class Object;
@@ -20,13 +21,13 @@ public:
   void addEventListener(const std::string &event, Object *object);
 
   template <class T> void addEventListener(Object *object) {
-    addEventListener(T::TYPE, object);
+    addEventListener(typeid(T).name(), object);
   }
 
   void removeEventListener(const std::string &event, Object *object);
 
   template <class T> void removeEventListener(Object *object) {
-    removeEventListener(T::TYPE, object);
+    removeEventListener(typeid(T).name(), object);
   }
 
   void removeEventListener(Object *emitter);

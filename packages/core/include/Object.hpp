@@ -36,11 +36,11 @@ public:
 
   template <class T, class E>
   void on(void (T::*callback)(Object *, const E &)) {
-    auto &callbacks = _callbacks[E::TYPE];
+    auto &callbacks = _callbacks[typeid(E).name()];
     callbacks.push_back([this, callback](Object *e, const EventBase &ee) {
       (((T *)this)->*callback)(e, (const E &)ee);
     });
-    _bus->addEventListener(E::TYPE, this);
+    _bus->addEventListener(typeid(E).name(), this);
   }
 };
 } // namespace aleph::core

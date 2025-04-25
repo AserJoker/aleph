@@ -27,7 +27,5 @@ public:
   bool isControl() const;
 
   bool isAlt() const;
-
-  static inline constexpr auto TYPE = "system.mouse";
 };
 }; // namespace aleph::system
