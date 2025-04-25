@@ -1,5 +1,6 @@
 
-
+#include <errhandlingapi.h>
+#include <format>
 #ifdef WIN32
 #include "core/include/Color.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -27,23 +28,56 @@ static DWORD oldOutputMode = 0;
 static HANDLE hInput = 0;
 static HANDLE hOutput = 0;
 
+using WindowsException = core::Exception<"WindowsException">;
+
 void Terminal::setup() {
-  SetConsoleCP(CP_UTF8);
-  SetConsoleOutputCP(CP_UTF8);
+  if (!SetConsoleCP(CP_UTF8)) {
+    throw WindowsException(std::format(
+        "Failed to set console code page,error code: 0x{:x}", GetLastError()));
+  }
+  if (!SetConsoleOutputCP(CP_UTF8)) {
+    throw WindowsException(
+        std::format("Failed to set console output code page,error code: 0x{:x}",
+                    GetLastError()));
+  }
   hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (!hOutput) {
+    throw WindowsException(std::format(
+        "Failed to get console stdout handle: 0x{:x}", GetLastError()));
+  }
   DWORD mode = 0;
-  GetConsoleMode(hOutput, &mode);
+  if (!GetConsoleMode(hOutput, &mode)) {
+    throw WindowsException(std::format(
+        "Failed to get console stdout mode: 0x{:x}", GetLastError()));
+  }
   oldInputMode = mode;
   mode |= (ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN);
-  SetConsoleMode(hOutput, mode);
+  if (!SetConsoleMode(hOutput, mode)) {
+    throw WindowsException(std::format(
+        "Failed to set console stdout mode: 0x{:x}", GetLastError()));
+  }
   mode = 0;
   hInput = GetStdHandle(STD_INPUT_HANDLE);
-  GetConsoleMode(hInput, &mode);
+  if (!hOutput) {
+    throw WindowsException(std::format(
+        "Failed to get console stdin handle: 0x{:x}", GetLastError()));
+  }
+  if (!GetConsoleMode(hInput, &mode)) {
+    throw WindowsException(std::format(
+        "Failed to get console stdin mode: 0x{:x}", GetLastError()));
+  }
   oldInputMode = mode;
-  SetConsoleMode(hInput, ENABLE_EXTENDED_FLAGS);
-  SetConsoleMode(hInput, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
+  if (!SetConsoleMode(hInput, ENABLE_EXTENDED_FLAGS)) {
+    throw WindowsException(std::format(
+        "Failed to set console stdin mode: 0x{:x}", GetLastError()));
+  }
+  if (!SetConsoleMode(hInput, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT)) {
+    throw WindowsException(std::format(
+        "Failed to set console stdin mode: 0x{:x}", GetLastError()));
+  }
   CONSOLE_SCREEN_BUFFER_INFO csbi = {};
-  GetConsoleScreenBufferInfo(hOutput, &csbi);
+  if (!GetConsoleScreenBufferInfo(hOutput, &csbi)) {
+  }
   _size.width = csbi.dwSize.X;
   _size.height = csbi.dwSize.Y;
 }

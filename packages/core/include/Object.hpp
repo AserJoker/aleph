@@ -12,13 +12,12 @@
 namespace aleph::core {
 class Object : public ObjectBase {
 private:
-  std::unordered_map<
-      std::string,
-      std::vector<std::function<void(Object *, const EventBase &)>>>
-      _callbacks;
+  using Callback = std::function<void(Object *, const EventBase &)>;
+
+  std::unordered_map<std::string, std::vector<Callback>> _callbacks;
 
 protected:
-  core::AutoPtr<EventBus> _bus = core::Singleton<EventBus>::get();
+  core::Singleton<EventBus> _bus;
 
 public:
   Object();

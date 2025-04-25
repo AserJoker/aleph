@@ -3,9 +3,12 @@
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
 #include "system/include/InputEvent.hpp"
+#include "system/include/Key.hpp"
 #include "system/include/Terminal.hpp"
 #include "system/include/WheelEvent.hpp"
 #include <cstdio>
+#include <exception>
+#include <iostream>
 #include <thread>
 
 using namespace aleph;
@@ -29,28 +32,41 @@ public:
 
   void onWheel(Object *, const system::WheelEvent &event) {}
 
-  void onInput(Object *, const system::InputEvent &event) {}
+  void onInput(Object *, const system::InputEvent &event) {
+    auto &codes = event.getCodes();
+    if (codes.size() == 1) {
+      if (codes[0] == system::Key::ESC) {
+        _running = false;
+      }
+    }
+  }
 
   int run() {
-    _terminal->setup();
-    _terminal->setMouse(true);
-    _terminal->setCursor(false);
-    _terminal->clear();
-    _terminal->present();
-    while (_running) {
-      using namespace std::chrono;
-      _terminal->pollEvent();
+    try {
+      _terminal->setup();
+      _terminal->setMouse(true);
+      _terminal->setCursor(false);
+      _terminal->clear();
       _terminal->present();
-      std::this_thread::sleep_for(10ms);
+      while (_running) {
+        using namespace std::chrono;
+        _terminal->pollEvent();
+        _terminal->present();
+        std::this_thread::sleep_for(10ms);
+      }
+      _terminal->move(1, 1);
+      _terminal->setNormal();
+      _terminal->clear();
+      _terminal->present();
+      _terminal->setMouse(false);
+      _terminal->setCursor(true);
+      _terminal->cleanup();
+      return 0;
+    } catch (std::exception &e) {
+      _terminal->cleanup();
+      std::cerr << e.what() << std::endl;
+      return -1;
     }
-    _terminal->move(1, 1);
-    _terminal->setNormal();
-    _terminal->clear();
-    _terminal->present();
-    _terminal->setMouse(false);
-    _terminal->setCursor(true);
-    _terminal->cleanup();
-    return 0;
   }
 };
 

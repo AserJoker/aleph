@@ -10,6 +10,7 @@ public:
     }
     return instance;
   }
+  
   Singleton() : AutoPtr<T>(get()) {}
 };
 } // namespace aleph::core

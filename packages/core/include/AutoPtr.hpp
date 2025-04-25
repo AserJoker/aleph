@@ -1,4 +1,5 @@
 #pragma once
+#include "Exception.hpp"
 #include <cstdint>
 #include <type_traits>
 template <class T>
@@ -37,13 +38,33 @@ public:
 
   virtual ~AutoPtr() { dispose(); }
 
-  T *operator->() { return _object; }
+  T *operator->() {
+    if (!_object) {
+      throw NullpointerException{"-> access to nullptr"};
+    }
+    return _object;
+  }
 
-  const T *operator->() const { return _object; }
+  const T *operator->() const {
+    if (!_object) {
+      throw NullpointerException{"-> access to nullptr"};
+    }
+    return _object;
+  }
 
-  T &operator*() { return *_object; }
+  T &operator*() {
+    if (!_object) {
+      throw NullpointerException{"* access to nullptr"};
+    }
+    return *_object;
+  }
 
-  const T &operator*() const { return *_object; }
+  const T &operator*() const {
+    if (!_object) {
+      throw NullpointerException{"* access to nullptr"};
+    }
+    return *_object;
+  }
 
   T *raw() { return _object; }
 
