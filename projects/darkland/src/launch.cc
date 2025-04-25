@@ -1,4 +1,5 @@
 #include "core/include/AutoPtr.hpp"
+#include "core/include/Co.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -70,7 +71,37 @@ public:
   }
 };
 
+void fn1() {
+  for (int i = 0; i < 10; i++) {
+    printf("f1: %d\n", i);
+    core::Co::yield();
+  }
+}
+
+void fn2() {
+  for (int i = 0; i < 5; i++) {
+    printf("f2: %d\n", i);
+    core::Co::yield();
+  }
+}
+
+void fn3() {
+  for (int i = 0; i < 10; i++) {
+    printf("f3: %d\n", i);
+    core::Co::yield();
+  }
+}
+
 int main(int argc, char *argv[]) {
-  Application app;
-  return app.run();
+  // Application app;
+  // return app.run();
+  core::Co::setup();
+  core::Co::create(fn1);
+  core::Co::create(fn2);
+  core::Co::create(fn3);
+  while (!core::Co::ready()) {
+    core::Co::yield();
+  }
+  core::Co::cleanup();
+  return 0;
 }

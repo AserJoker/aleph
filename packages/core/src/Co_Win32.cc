@@ -1,4 +1,6 @@
+#ifdef WIN32
 #include "core/include/Co.hpp"
+
 #include <vector>
 #include <windows.h>
 using namespace aleph;
@@ -30,6 +32,7 @@ void Co::yield() {
     current++;
     while (!coroutines[current].running && current < coroutines.size()) {
       DeleteFiber(coroutines[current].fiber);
+      coroutines.erase(coroutines.begin() + current);
     }
     if (current >= coroutines.size()) {
       current = 0;
@@ -49,3 +52,4 @@ void Co::create(void (*entry)()) {
   auto ctx = &*coroutines.rbegin();
   ctx->fiber = CreateFiber(CO_STACK_SIZE, onCoroutine, (void *)ctx);
 }
+#endif
