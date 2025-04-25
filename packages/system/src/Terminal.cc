@@ -382,43 +382,49 @@ void Terminal::pollEvent() {
 
 void Terminal::present() { fflush(stdout); }
 
-void Terminal::move(int x, int y) { printf("\033[%d;%dH", y, x); }
+void Terminal::move(int x, int y) { fprintf(stderr, "\033[%d;%dH", y, x); }
 
 void Terminal::clear() { write(STDOUT_FILENO, "\033[2J", 4); }
 
 void Terminal::setCursor(bool visible) {
-  printf("\033[?25%c", visible ? 'h' : 'l');
+  fprintf(stderr, "\033[?25%c", visible ? 'h' : 'l');
 }
 
 void Terminal::setMouse(bool enable) {
-  printf("\033[?1003;1006%c", enable ? 'h' : 'l');
+  fprintf(stderr, "\033[?1003;1006%c", enable ? 'h' : 'l');
 }
-void Terminal::saveCursor() { printf("\033[s"); }
+void Terminal::saveCursor() { fprintf(stderr, "\033[s"); }
 
-void Terminal::loadCursor() { printf("\033[u"); }
+void Terminal::loadCursor() { fprintf(stderr, "\033[u"); }
 
 const core::Size &Terminal::getSize() const { return _size; }
 
 const core::Point &Terminal::getMousePosition() const { return _mouse; }
 
-void Terminal::setNormal() { printf("\033[0m"); }
+void Terminal::setNormal() { fprintf(stderr, "\033[0m"); }
 
-void Terminal::setBold(bool enable) { printf("\033[%dm", enable ? 1 : 22); }
+void Terminal::setBold(bool enable) {
+  fprintf(stderr, "\033[%dm", enable ? 1 : 22);
+}
 
 void Terminal::setHalfBright(bool enable) {
-  printf("\033[%dm", enable ? 2 : 22);
+  fprintf(stderr, "\033[%dm", enable ? 2 : 22);
 }
 
-void Terminal::setItalic(bool enable) { printf("\033[%dm", enable ? 3 : 23); }
+void Terminal::setItalic(bool enable) {
+  fprintf(stderr, "\033[%dm", enable ? 3 : 23);
+}
 
 void Terminal::setUnderline(bool enable) {
-  printf("\033[%dm", enable ? 4 : 24);
+  fprintf(stderr, "\033[%dm", enable ? 4 : 24);
 }
 
-void Terminal::setBlink(bool enable) { printf("\033[%dm", enable ? 5 : 25); }
+void Terminal::setBlink(bool enable) {
+  fprintf(stderr, "\033[%dm", enable ? 5 : 25);
+}
 
 void Terminal::setReverseVideo(bool enable) {
-  printf("\033[%dm", enable ? 7 : 27);
+  fprintf(stderr, "\033[%dm", enable ? 7 : 27);
 }
 
 void Terminal::setColor(const TERMINAL_COLOR_16 &color, bool bright) {
@@ -426,7 +432,7 @@ void Terminal::setColor(const TERMINAL_COLOR_16 &color, bool bright) {
   if (bright) {
     c += 60;
   }
-  printf("\033[%dm", c);
+  fprintf(stderr, "\033[%dm", c);
 };
 
 void Terminal::setBackgroundColor(const TERMINAL_COLOR_16 &color, bool bright) {
@@ -435,16 +441,18 @@ void Terminal::setBackgroundColor(const TERMINAL_COLOR_16 &color, bool bright) {
   if (bright) {
     c += 60;
   }
-  printf("\033[%dm", c);
+  fprintf(stderr, "\033[%dm", c);
 };
 
-void Terminal::setColor(uint8_t color) { printf("\033[38;5;%dm", color); }
+void Terminal::setColor(uint8_t color) {
+  fprintf(stderr, "\033[38;5;%dm", color);
+}
 
 void Terminal::setBackgroundColor(uint8_t color) {
-  printf("\033[48;5;%dm", color);
+  fprintf(stderr, "\033[48;5;%dm", color);
 }
 void Terminal::setPalette(uint8_t idx, const core::Color &color) {
-  printf("\033]4;%d;rgb:%x/%x/%x\007", idx, color.r, color.g, color.b);
+  fprintf(stderr, "\033]4;%d;rgb:%x/%x/%x\007", idx, color.r, color.g, color.b);
 }
 
 void Terminal::setPalette(uint8_t idx, uint32_t color) {
@@ -452,10 +460,14 @@ void Terminal::setPalette(uint8_t idx, uint32_t color) {
 }
 
 void Terminal::setColor(const core::Color &color) {
-  printf("\033[38;2;%d;%d;%dm", color.r, color.g, color.b);
+  fprintf(stderr, "\033[38;2;%d;%d;%dm", color.r, color.g, color.b);
 }
 
 void Terminal::setBackgroundColor(const core::Color &color) {
-  printf("\033[48;2;%d;%d;%dm", color.r, color.g, color.b);
+  fprintf(stderr, "\033[48;2;%d;%d;%dm", color.r, color.g, color.b);
+}
+
+void Terminal::print(const std::string &str) {
+  write(STDOUT_FILENO, str.c_str(), str.length());
 }
 #endif

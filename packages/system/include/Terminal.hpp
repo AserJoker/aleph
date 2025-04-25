@@ -75,5 +75,7 @@ public:
   void setColor(const core::Color &color);
 
   void setBackgroundColor(const core::Color &color);
+
+  void print(const std::string &str);
 };
 } // namespace aleph::system

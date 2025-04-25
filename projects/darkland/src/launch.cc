@@ -1,5 +1,4 @@
 #include "core/include/AutoPtr.hpp"
-#include "core/include/Color.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
 #include "system/include/ButtonEvent.hpp"
@@ -22,8 +21,6 @@ private:
 
   bool _running = true;
 
-  int _y = 3;
-
 public:
   Application() : _running(true) {
     on(&Application::onInput);
@@ -33,28 +30,7 @@ public:
 
   ~Application() { _terminal->cleanup(); }
 
-  void onButton(Object *, const system::ButtonEvent &event) {
-    if (event.getButton() == 0) {
-      _terminal->move(10, 10);
-      uint16_t idx = 0;
-      for (uint8_t i = 0; i < 16; i++) {
-        _terminal->move(10, 10 + i);
-        for (uint8_t j = 0; j < 16; j++) {
-          _terminal->setBackgroundColor(core::Color{(uint8_t)idx, 0, 0});
-          printf("%3d ", idx);
-          idx++;
-        }
-      }
-    } else if (event.getButton() == system::Key::BUTTON_RIGHT) {
-      _running = false;
-    }
-    _terminal->move(1, 3);
-    _terminal->setNormal();
-    _terminal->setColor(core::Color{0x1cfff});
-    printf("button: %d", event.getButton());
-    _terminal->setNormal();
-    _terminal->present();
-  }
+  void onButton(Object *, const system::ButtonEvent &event) {}
 
   void onWheel(Object *, const system::WheelEvent &event) {}
 
@@ -69,8 +45,8 @@ public:
       _terminal->clear();
       return;
     }
-    for (auto idx = 0; idx < codes.size(); idx++) {
-      auto ch = (uint8_t)(codes[idx] & 0xff);
+    if (codes.size() == 1) {
+      auto ch = (uint8_t)(codes[0] & 0xff);
       bool ctrl = false;
       if (ch < 0x20) {
         str += system::Key::name(ch + 0x40);
@@ -80,16 +56,17 @@ public:
       }
       if (codes.size() == 1) {
         str += std::format(", shift: {}, ctrl: {}, meta: {}",
-                           (codes[idx] & system::Key::FLAG_SHIFT) != 0,
-                           (codes[idx] & system::Key::FLAG_CTRL) != 0 || ctrl,
-                           (codes[idx] & system::Key::FLAG_META) != 0);
+                           (codes[0] & system::Key::FLAG_SHIFT) != 0,
+                           (codes[0] & system::Key::FLAG_CTRL) != 0 || ctrl,
+                           (codes[0] & system::Key::FLAG_META) != 0);
+      }
+    } else {
+      for (auto idx = 0; idx < codes.size(); idx++) {
+        str.push_back(codes[idx]);
       }
     }
-    // _terminal->move(1, 4);
-    // printf("                                                 ");
-    static auto y = 3;
-    _terminal->move(1, y++);
-    printf("%s", str.c_str());
+    _terminal->move(1, 3);
+    _terminal->print(str);
   }
 
   int run() {
@@ -99,19 +76,15 @@ public:
     _terminal->setCursor(false);
     _terminal->clear();
     _terminal->present();
-    _terminal->move(1, 5);
-    // const char *str = "\u4e2d";
-    // printf("\u4e2d");
-    _terminal->present();
     while (_running) {
       auto &size = _terminal->getSize();
       _terminal->move(1, 1);
       _terminal->setNormal();
-      printf("%d,%d", size.width, size.height);
+      _terminal->print(std::format("{},{}", size.width, size.height));
       _terminal->move(1, 2);
       _terminal->setNormal();
       auto &mouse = _terminal->getMousePosition();
-      printf("%d,%d", mouse.x, mouse.y);
+      _terminal->print(std::format("{},{}", mouse.x, mouse.y));
       using namespace std::chrono;
       _terminal->pollEvent();
       _terminal->present();
