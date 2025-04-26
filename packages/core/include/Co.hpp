@@ -1,20 +1,21 @@
 #pragma once
 #include "core/include/AutoPtr.hpp"
+#include "core/include/ObjectBase.hpp"
 #include "core/include/Task.hpp"
 #ifndef CO_STACK_SIZE
 #define CO_STACK_SIZE 4096
 #endif
 namespace aleph::core {
-class Co {
+class Co : public ObjectBase {
 public:
-  static void setup();
+  Co();
 
-  static void cleanup();
+  ~Co();
 
-  static void yield();
+  void yield();
 
-  static bool ready();
+  bool ready();
 
-  static void create(const AutoPtr<Task> &task);
+  void create(const AutoPtr<Task> &task);
 };
 } // namespace aleph::core

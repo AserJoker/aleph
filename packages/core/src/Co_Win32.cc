@@ -1,6 +1,7 @@
 
 #include "core/include/AutoPtr.hpp"
 #include "core/include/ObjectBase.hpp"
+#include "core/include/Singleton.hpp"
 #ifdef WIN32
 #include "core/include/Co.hpp"
 
@@ -23,10 +24,10 @@ static void onCoroutine(void *parameter) {
   auto ctx = (Coroutine *)parameter;
   ctx->task->run();
   ctx->running = false;
-  Co::yield();
+  core::Singleton<Co>::get()->yield();
 }
 
-void Co::setup() {
+Co::Co() {
   auto coroutine = new Coroutine{};
   coroutine->fiber = ConvertThreadToFiber(NULL);
   coroutine->running = true;
@@ -34,7 +35,7 @@ void Co::setup() {
   coroutines.push_back(coroutine);
 }
 
-void Co::cleanup() { ConvertFiberToThread(); }
+Co::~Co() { ConvertFiberToThread(); }
 
 void Co::yield() {
   if (coroutines.size() > 1) {

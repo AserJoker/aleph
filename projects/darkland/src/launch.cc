@@ -1,3 +1,4 @@
+#include "core/include/Async.hpp"
 #include "core/include/AutoPtr.hpp"
 #include "core/include/Co.hpp"
 #include "core/include/Object.hpp"
@@ -44,6 +45,8 @@ public:
   }
 
   int run() {
+    using namespace std::chrono;
+    core::Singleton<core::Co> co;
     try {
       _terminal->setup();
       _terminal->setMouse(true);
@@ -51,10 +54,16 @@ public:
       _terminal->clear();
       _terminal->present();
       while (_running) {
-        using namespace std::chrono;
         _terminal->pollEvent();
         _terminal->present();
-        std::this_thread::sleep_for(10ms);
+        if (!co->ready()) {
+          co->yield();
+        }
+        std::this_thread::sleep_for(5ms);
+      }
+      while (!co->ready()) {
+        co->yield();
+        std::this_thread::sleep_for(5ms);
       }
       _terminal->move(1, 1);
       _terminal->setNormal();
@@ -72,37 +81,33 @@ public:
   }
 };
 
+void fn2(int d) {
+  for (int i = 0; i < d; i++) {
+    printf("fn2: %d\n", i);
+    core::Singleton<core::Co>::get()->yield();
+  }
+}
+int add(int a, int b) {
+  core::Async::run(fn2, 5)->wait();
+  for (int i = 0; i < 10; i++) {
+    printf("add: %d\n", i);
+    core::Singleton<core::Co>::get()->yield();
+  }
+  return a + b;
+}
+
 void fn1() {
-  for (int i = 0; i < 10; i++) {
-    printf("f1: %d\n", i);
-    core::Co::yield();
-  }
-}
-
-void fn2() {
-  for (int i = 0; i < 5; i++) {
-    printf("f2: %d\n", i);
-    core::Co::yield();
-  }
-}
-
-void fn3() {
-  for (int i = 0; i < 10; i++) {
-    printf("f3: %d\n", i);
-    core::Co::yield();
-  }
+  auto promise = core::Async::run(add, 1, 2);
+  printf("fn1: %d\n", promise->wait());
 }
 
 int main(int argc, char *argv[]) {
   // Application app;
   // return app.run();
-  core::Co::setup();
-  core::Co::create(new core::FunctionalTask(fn1));
-  core::Co::create(new core::FunctionalTask(fn2));
-  core::Co::create(new core::FunctionalTask(fn3));
-  while (!core::Co::ready()) {
-    core::Co::yield();
+  core::Singleton<core::Co> co;
+  co->create(new core::FunctionalTask{fn1});
+  while (!co->ready()) {
+    co->yield();
   }
-  core::Co::cleanup();
   return 0;
 }
