@@ -1,8 +1,7 @@
 #pragma once
-#include "EventBase.hpp"
+#include "Event.hpp"
 #include "ObjectBase.hpp"
 #include <string>
-#include <typeinfo>
 #include <vector>
 namespace aleph::core {
 class Object;
@@ -11,7 +10,7 @@ private:
   std::unordered_map<std::string, std::vector<Object *>> _bus;
 
 public:
-  void emit(Object *emitter, const EventBase &event);
+  void emit(Object *emitter, const BaseEvent &event);
 
   template <class T, class... Args> void emit(Object *emitter, Args... args) {
     T event{args...};
@@ -21,13 +20,13 @@ public:
   void addEventListener(const std::string &event, Object *object);
 
   template <class T> void addEventListener(Object *object) {
-    addEventListener(typeid(T).name(), object);
+    addEventListener(T::TYPE_NAME, object);
   }
 
   void removeEventListener(const std::string &event, Object *object);
 
   template <class T> void removeEventListener(Object *object) {
-    removeEventListener(typeid(T).name(), object);
+    removeEventListener(T::TYPE_NAME, object);
   }
 
   void removeEventListener(Object *emitter);

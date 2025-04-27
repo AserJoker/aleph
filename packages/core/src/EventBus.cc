@@ -3,7 +3,7 @@
 using namespace aleph;
 using namespace aleph::core;
 
-void EventBus::emit(Object *emitter, const EventBase &event) {
+void EventBus::emit(Object *emitter, const BaseEvent &event) {
   for (auto &listeners : _bus[event.getType()]) {
     listeners->onEvent(emitter, event);
   }

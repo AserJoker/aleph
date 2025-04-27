@@ -1,113 +1,78 @@
-#include "core/include/Async.hpp"
 #include "core/include/AutoPtr.hpp"
-#include "core/include/Co.hpp"
 #include "core/include/Object.hpp"
 #include "core/include/Singleton.hpp"
-#include "core/include/Task.hpp"
-#include "system/include/ButtonEvent.hpp"
+#include "runtime/include/Application.hpp"
+#include "runtime/include/Entity.hpp"
+#include "runtime/include/QuitEvent.hpp"
+#include "runtime/include/System.hpp"
+#include "runtime/include/TerminalModule.hpp"
 #include "system/include/InputEvent.hpp"
 #include "system/include/Key.hpp"
 #include "system/include/Terminal.hpp"
-#include "system/include/WheelEvent.hpp"
+#include "video/include/RenderableComponent.hpp"
+#include "video/include/RendererSystem.hpp"
 #include <cstdio>
-#include <exception>
-#include <iostream>
-#include <thread>
 
 using namespace aleph;
 
-class Application : public core::Object {
+class GameMainSystem : public runtime::System {
 private:
-  core::Singleton<system::Terminal> _terminal;
+  void onInput(core::Object *, const system::InputEvent &e) {
+    auto &codes = e.getCodes();
+    if (codes.size() == 1 && codes[0] == system::Key::ESC) {
+      emit<runtime::QuitEvent>();
+    }
+    auto renderable =
+        _helloworld->getComponent(video::RenderableComponent::TYPE_NAME)
+            .cast<video::RenderableComponent>();
+    auto &pos = renderable->getPosition();
+    auto &brush = renderable->getBrush();
+    auto attr = brush->getAttribute();
+    if (codes.size() == 1) {
+      if (codes[0] == system::Key::LEFT) {
+        pos.x--;
+      }
+      if (codes[0] == system::Key::RIGHT) {
+        pos.x++;
+      }
+      if (codes[0] == system::Key::UP) {
+        pos.y--;
+      }
+      if (codes[0] == system::Key::DOWN) {
+        pos.y++;
+      }
+      if (codes[0] == 'b') {
+        if (brush->getAttribute().flag & system::Terminal::Attr::COLOR) {
+          attr.flag &= ~system::Terminal::Attr::COLOR;
+        } else {
+          attr.flag |= system::Terminal::Attr::COLOR;
+        }
+        brush->setAttribute(attr);
+      }
+    }
+  }
 
-  bool _running = true;
+  core::AutoPtr<runtime::Entity> _helloworld;
 
 public:
-  Application() : _running(true) {
-    on(&Application::onInput);
-    on(&Application::onWheel);
-    on(&Application::onButton);
-  }
-
-  ~Application() { _terminal->cleanup(); }
-
-  void onButton(Object *, const system::ButtonEvent &event) {}
-
-  void onWheel(Object *, const system::WheelEvent &event) {}
-
-  void onInput(Object *, const system::InputEvent &event) {
-    auto &codes = event.getCodes();
-    if (codes.size() == 1) {
-      if (codes[0] == system::Key::ESC) {
-        _running = false;
-      }
-    }
-  }
-
-  int run() {
-    using namespace std::chrono;
-    core::Singleton<core::Co> co;
-    try {
-      _terminal->setup();
-      _terminal->setMouse(true);
-      _terminal->setCursor(false);
-      _terminal->clear();
-      _terminal->present();
-      while (_running) {
-        _terminal->pollEvent();
-        _terminal->present();
-        if (!co->ready()) {
-          co->yield();
-        }
-        std::this_thread::sleep_for(5ms);
-      }
-      while (!co->ready()) {
-        co->yield();
-        std::this_thread::sleep_for(5ms);
-      }
-      _terminal->move(1, 1);
-      _terminal->setNormal();
-      _terminal->clear();
-      _terminal->present();
-      _terminal->setMouse(false);
-      _terminal->setCursor(true);
-      _terminal->cleanup();
-      return 0;
-    } catch (std::exception &e) {
-      _terminal->cleanup();
-      std::cerr << e.what() << std::endl;
-      return -1;
-    }
+  GameMainSystem() {
+    on(&GameMainSystem::onInput);
+    _helloworld = new runtime::Entity{};
+    auto renderable = new video::RenderableComponent();
+    renderable->setCharacter("Hello world");
+    renderable->getPosition() = {10, 10};
+    renderable->getBrush() = new video::Brush{{
+        .color = {0xfe, 0x0, 0xc0},
+        .flag = system::Terminal::Attr::COLOR,
+    }};
+    _helloworld->addComponent(renderable);
   }
 };
 
-void fn2(int d) {
-  for (int i = 0; i < d; i++) {
-    printf("fn2: %d\n", i);
-    core::Singleton<core::Co>::get()->yield();
-  }
-}
-int add(int a, int b) {
-  core::Async::run(fn2, 5)->wait();
-  for (int i = 0; i < 10; i++) {
-    printf("add: %d\n", i);
-    core::Singleton<core::Co>::get()->yield();
-  }
-  return a + b;
-}
-
-void fn1() {
-  auto promise = core::Async::run(add, 1, 2);
-  printf("fn1: %d\n", promise->wait());
-}
-
 int main(int argc, char *argv[]) {
-  // Application app;
-  // return app.run();
-  core::Singleton<core::Co> co;
-  co->create(new core::FunctionalTask{fn1});
-  while (!co->ready()) {
-    co->yield();
-  }
-  return 0;
+  core::Singleton<runtime::Application> theApp;
+  theApp->addModule(new runtime::TerminalModule)
+      ->addSystem(new GameMainSystem)
+      ->addSystem(new video::RendererSystem);
+  return theApp->run(argc, argv);
 }

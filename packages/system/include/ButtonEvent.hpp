@@ -1,8 +1,8 @@
 #pragma once
-#include "core/include/EventBase.hpp"
+#include "core/include/Event.hpp"
 #include <cstdint>
 namespace aleph::system {
-class ButtonEvent : public core::EventBase {
+class ButtonEvent : public core::Event<"system.button"> {
 private:
   uint32_t _button;
 

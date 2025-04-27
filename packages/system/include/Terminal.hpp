@@ -8,6 +8,20 @@
 
 namespace aleph::system {
 class Terminal : public core::Object {
+public:
+  struct Attr {
+    core::Color background;
+    core::Color color;
+    uint16_t flag;
+    constexpr static inline auto BOLD = 1 << 0;
+    constexpr static inline auto HALF_BRIGHT = 1 << 1;
+    constexpr static inline auto ITALIC = 1 << 2;
+    constexpr static inline auto UNDERLINE = 1 << 4;
+    constexpr static inline auto BLINK = 1 << 5;
+    constexpr static inline auto COLOR = 1 << 6;
+    constexpr static inline auto BACKGROUND = 1 << 7;
+  };
+
 private:
   core::Size _size;
 
@@ -28,7 +42,7 @@ public:
 
   void pollEvent();
 
-  void present();
+  void flush();
 
   void move(int x, int y);
 
@@ -76,6 +90,10 @@ public:
 
   void setBackgroundColor(const core::Color &color);
 
+  void setDecMode(bool enable);
+
   void print(const std::string &str);
+
+  std::string compile(const Attr &attr);
 };
 } // namespace aleph::system

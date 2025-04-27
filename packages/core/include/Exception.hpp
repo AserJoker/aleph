@@ -50,4 +50,5 @@ public:
 };
 using NullpointerException = Exception<"NullpointerException">;
 using IOException = Exception<"IOException">;
+using CoException = Exception<"CoException">;
 } // namespace aleph::core

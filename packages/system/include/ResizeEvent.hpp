@@ -1,8 +1,8 @@
 #pragma once
-#include "core/include/EventBase.hpp"
+#include "core/include/Event.hpp"
 #include "core/include/Size.hpp"
 namespace aleph::system {
-class ResizeEvent : public core::EventBase {
+class ResizeEvent : public core::Event<"system.resize"> {
 private:
   core::Size _size;
 

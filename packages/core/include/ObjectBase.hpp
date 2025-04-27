@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <typeinfo>
 #include <unordered_map>
 namespace aleph::core {
 class ObjectBase {
@@ -28,6 +29,8 @@ public:
   inline uint64_t ref() const { return _ref; }
 
   inline Handle getHandle() const { return _handle; }
+
+  inline virtual const char *getType() const { return typeid(*this).name(); }
 
   static ObjectBase *select(Handle handle);
 };

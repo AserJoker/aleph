@@ -1,9 +1,9 @@
 #pragma once
-#include "core/include/EventBase.hpp"
+#include "core/include/Event.hpp"
 #include <cstdint>
 #include <vector>
 namespace aleph::system {
-class InputEvent : public core::EventBase {
+class InputEvent : public core::Event<"system.input"> {
 private:
   std::vector<int64_t> _codes;
 

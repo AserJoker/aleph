@@ -380,7 +380,7 @@ void Terminal::pollEvent() {
   parseEvent();
 }
 
-void Terminal::present() { fflush(stdout); }
+void Terminal::flush() { fflush(stdout); }
 
 void Terminal::move(int x, int y) { fprintf(stderr, "\033[%d;%dH", y, x); }
 

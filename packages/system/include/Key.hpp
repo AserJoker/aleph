@@ -31,7 +31,7 @@ public:
   constexpr static inline auto END = 0x88;
   constexpr static inline auto PAGE_UP = 0x89;
   constexpr static inline auto PAGE_DOWN = 0x90;
-  constexpr static inline auto F(int n) { return 0x90 + n; }
+  constexpr static inline auto F(int64_t n) { return 0x90 + n; }
   constexpr static inline int64_t FLAG_SHIFT = 1 << 16;
   constexpr static inline int64_t FLAG_CTRL = 1 << 17;
   constexpr static inline int64_t FLAG_META = 1 << 18;

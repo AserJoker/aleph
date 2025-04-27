@@ -2,6 +2,9 @@
 #include "core/include/AutoPtr.hpp"
 #include "core/include/ObjectBase.hpp"
 #include "core/include/Singleton.hpp"
+#include <exception>
+#include <stdexcept>
+#include <string>
 #ifdef WIN32
 #include "core/include/Co.hpp"
 
@@ -14,6 +17,7 @@ struct Coroutine : public ObjectBase {
   LPVOID fiber;
   bool running;
   core::AutoPtr<Task> task;
+  std::string error;
 };
 
 static std::vector<AutoPtr<Coroutine>> coroutines;
@@ -22,9 +26,21 @@ static size_t current = 0;
 
 static void onCoroutine(void *parameter) {
   auto ctx = (Coroutine *)parameter;
-  ctx->task->run();
-  ctx->running = false;
-  core::Singleton<Co>::get()->yield();
+  try {
+    ctx->task->run();
+    ctx->running = false;
+    core::Singleton<Co>::get()->yield();
+  } catch (std::exception &e) {
+    coroutines[0]->error = e.what();
+    ctx->running = false;
+    core::Singleton<Co>::get()->yield();
+    current = 0;
+  } catch (...) {
+    coroutines[0]->error = "unknown coroutine error";
+    ctx->running = false;
+    core::Singleton<Co>::get()->yield();
+    current = 0;
+  }
 }
 
 Co::Co() {
@@ -48,6 +64,10 @@ void Co::yield() {
       current = 0;
     }
     SwitchToFiber(coroutines[current]->fiber);
+    if (!coroutines[current]->error.empty()) {
+      throw CoException{"uncaught exception",
+                        std::runtime_error(coroutines[current]->error)};
+    }
   }
 }
 

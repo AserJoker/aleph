@@ -1,7 +1,7 @@
 #pragma once
-#include "core/include/EventBase.hpp"
+#include "core/include/Event.hpp"
 namespace aleph::system {
-class WheelEvent : public core::EventBase {
+class WheelEvent : public core::Event<"system.wheel"> {
 private:
   bool _direction;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "EventBase.hpp"
+#include "Event.hpp"
 #include "EventBus.hpp"
 #include "ObjectBase.hpp"
 #include "core/include/AutoPtr.hpp"
@@ -12,7 +12,7 @@
 namespace aleph::core {
 class Object : public ObjectBase {
 private:
-  using Callback = std::function<void(Object *, const EventBase &)>;
+  using Callback = std::function<void(Object *, const BaseEvent &)>;
 
   std::unordered_map<std::string, std::vector<Callback>> _callbacks;
 
@@ -24,9 +24,9 @@ public:
 
   ~Object() override;
 
-  void onEvent(Object *emitter, const EventBase &event);
+  void onEvent(Object *emitter, const BaseEvent &event);
 
-  void emit(const EventBase &event);
+  void emit(const BaseEvent &event);
 
   template <class T, class... Args> void emit(Args... args) {
     T event{args...};
@@ -35,11 +35,11 @@ public:
 
   template <class T, class E>
   void on(void (T::*callback)(Object *, const E &)) {
-    auto &callbacks = _callbacks[typeid(E).name()];
-    callbacks.push_back([this, callback](Object *e, const EventBase &ee) {
+    auto &callbacks = _callbacks[E::TYPE_NAME];
+    callbacks.push_back([this, callback](Object *e, const BaseEvent &ee) {
       (((T *)this)->*callback)(e, (const E &)ee);
     });
-    _bus->addEventListener(typeid(E).name(), this);
+    _bus->addEventListener(E::TYPE_NAME, this);
   }
 };
 } // namespace aleph::core
