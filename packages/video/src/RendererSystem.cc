@@ -17,7 +17,9 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
   for (auto &entity : entities) {
     auto component = entity->getComponent<RenderableComponent>();
     if (component) {
-      auto &[col, row] = component->getPosition();
+      auto [col, row] = component->getPosition();
+      col++;
+      row++;
       if (row < 1 || row > (int32_t)size.height) {
         continue;
       }
@@ -87,7 +89,7 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
         result += ' ';
       }
       idx += core::UString(pixel.chr).getRenderWidth();
-      if (idx > size.width ) {
+      if (idx > size.width) {
         break;
       }
       result += pixel.chr;
