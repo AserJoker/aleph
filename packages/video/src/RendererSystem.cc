@@ -98,8 +98,13 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
       if (idx > size.width) {
         break;
       }
+      if (pixel.brush && pixel.brush->isUpdated()) {
+        pixel.brush->setIsUpdated(false);
+        result += pixel.brush->getFormat();
+      }
       result += pixel.chr;
     }
+    result += "\033[m";
     auto it = current.begin();
     while (it != current.end()) {
       if (it->second.chr.size() == 1 && it->second.chr[0] == ' ' &&

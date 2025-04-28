@@ -26,6 +26,6 @@ public:
 
   const core::UString &getCharacter() const;
 
-  void setCharacter(const std::string &source);
+  core::UString &getCharacter();
 };
 }; // namespace aleph::video

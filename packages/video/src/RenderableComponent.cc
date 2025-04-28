@@ -19,6 +19,4 @@ const core::UString &RenderableComponent::getCharacter() const {
   return _ustring;
 }
 
-void RenderableComponent::setCharacter(const std::string &source) {
-  _ustring = source;
-}
+core::UString &RenderableComponent::getCharacter() { return _ustring; }
