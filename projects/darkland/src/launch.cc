@@ -51,7 +51,7 @@ public:
     _helloworld = new runtime::Entity{};
     auto renderable = new video::RenderableComponent();
     renderable->setCharacter("test中文测试");
-    renderable->getPosition() = {11, 10};
+    renderable->getPosition() = {1, 1};
 
     _helloworld->addComponent(renderable);
   }

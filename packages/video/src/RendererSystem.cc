@@ -1,5 +1,6 @@
 #include "video/include/RendererSystem.hpp"
 #include "core/include/Object.hpp"
+#include "core/include/UString.hpp"
 #include "runtime/include/Entity.hpp"
 #include "runtime/include/TickEvent.hpp"
 #include "system/include/Terminal.hpp"
@@ -23,15 +24,14 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
       auto &ustr = component->getCharacter();
       int32_t offset = 0;
       for (int32_t idx = 0; idx < (int32_t)ustr.length(); idx++) {
-        current[row][col + offset] = {
-            .brush = component->getBrush(),
-            .chr = ustr.at(idx),
-        };
-        if (current[row][col + offset].chr.length() > 1) {
-          offset += 2;
-        } else {
-          offset += 1;
+        auto chr = ustr.at(idx);
+        if (col + offset >= 1) {
+          current[row][col + offset] = {
+              .brush = component->getBrush(),
+              .chr = chr,
+          };
         }
+        offset += core::UString(chr).getRenderWidth();
       }
     }
   }
@@ -66,7 +66,7 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
     for (auto &[col, pixel] : line) {
       if (current.contains(col - 1)) {
         auto chr = current.at(col - 1).chr;
-        if (chr.length() > 1) {
+        if (core::UString(chr).getRenderWidth() > 1) {
           current.erase(col);
         } else {
           current[col] = pixel;
@@ -78,16 +78,19 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
     std::string result;
     size_t idx = 0;
     for (auto &[col, pixel] : current) {
+
       while (idx < col) {
-        result += ' ';
         idx++;
+        if (idx > size.width) {
+          break;
+        }
+        result += ' ';
+      }
+      idx += core::UString(pixel.chr).getRenderWidth();
+      if (idx > size.width) {
+        break;
       }
       result += pixel.chr;
-      if (pixel.chr.length() > 1) {
-        idx += 2;
-      } else {
-        idx += 1;
-      }
     }
     auto it = current.begin();
     while (it != current.end()) {
