@@ -4,6 +4,7 @@
 #include "runtime/include/Entity.hpp"
 #include "runtime/include/TickEvent.hpp"
 #include "system/include/Terminal.hpp"
+#include "video/include/Brush.hpp"
 #include "video/include/RenderableComponent.hpp"
 #include <cstdint>
 #include <unordered_map>
@@ -98,11 +99,16 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
       if (idx > size.width) {
         break;
       }
-      if (pixel.brush && pixel.brush->isUpdated()) {
-        pixel.brush->setIsUpdated(false);
+      if (pixel.brush) {
         result += pixel.brush->getFormat();
+        if (pixel.brush->getMode() == Brush::DEC_MODE) {
+          result += "\033(0";
+        }
       }
       result += pixel.chr;
+      if (pixel.brush && pixel.brush->getMode() == Brush::DEC_MODE) {
+        result += "\033(B";
+      }
     }
     result += "\033[m";
     auto it = current.begin();

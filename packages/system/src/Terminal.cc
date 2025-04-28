@@ -467,6 +467,10 @@ void Terminal::setBackgroundColor(const core::Color &color) {
   fprintf(stderr, "\033[48;2;%d;%d;%dm", color.r, color.g, color.b);
 }
 
+void Terminal::setDecMode(bool enable) {
+  fprintf(stderr, "\033(%c", enable ? '0' : 'B');
+}
+
 void Terminal::print(const std::string &str) {
   write(STDOUT_FILENO, str.c_str(), str.length());
 }

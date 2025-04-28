@@ -17,6 +17,11 @@ bool Brush::isUpdated() const { return _updated; }
 
 void Brush::setIsUpdated(bool updated) { _updated = updated; }
 
-Brush::Brush(const system::Terminal::Attr &attr) : _attribute(attr) {
+uint8_t Brush::getMode() const { return _mode; }
+
+void Brush::setMode(uint8_t mode) { _mode = mode; };
+
+Brush::Brush(const system::Terminal::Attr &attr)
+    : _attribute(attr), _updated(true) {
   _format = core::Singleton<system::Terminal>::get()->compile(_attribute);
 }

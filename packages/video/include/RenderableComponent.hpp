@@ -13,8 +13,6 @@ private:
 
   core::UString _ustring;
 
-  std::string _mode{"ascii"};
-
 public:
   const core::Point &getPosition() const;
 

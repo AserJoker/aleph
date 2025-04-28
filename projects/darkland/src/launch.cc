@@ -50,12 +50,13 @@ public:
     on(&GameMainSystem::onInput);
     _entity = new runtime::Entity{};
     auto brush = new video::Brush{{
-        .background = {0xfe, 0x0f, 0x0},
+        .background = {0xff, 0xff, 0x0},
         .flag = system::Terminal::Attr::BACKGROUND,
     }};
     auto renderable = new video::RenderableComponent{};
     renderable->getBrush() = brush;
-    renderable->getCharacter() = "Test";
+    renderable->getCharacter() = "jk";
+    brush->setMode(brush->DEC_MODE);
     _entity->addComponent(renderable);
   }
 };

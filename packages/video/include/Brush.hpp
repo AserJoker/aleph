@@ -4,12 +4,19 @@
 #include <string>
 namespace aleph::video {
 class Brush : public core::ObjectBase {
+public:
+  constexpr static inline uint8_t ASCII_MODE = 0;
+
+  constexpr static inline uint8_t DEC_MODE = 1;
+
 private:
   system::Terminal::Attr _attribute{};
 
   std::string _format;
 
   bool _updated{};
+
+  uint8_t _mode{};
 
 public:
   Brush(const system::Terminal::Attr &attr = {});
@@ -23,5 +30,9 @@ public:
   bool isUpdated() const;
 
   void setIsUpdated(bool updated);
+
+  uint8_t getMode() const;
+
+  void setMode(uint8_t mode);
 };
 } // namespace aleph::video
