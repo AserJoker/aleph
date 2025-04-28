@@ -8,7 +8,6 @@
 #include "runtime/include/TerminalModule.hpp"
 #include "system/include/InputEvent.hpp"
 #include "system/include/Key.hpp"
-#include "system/include/Terminal.hpp"
 #include "video/include/RenderableComponent.hpp"
 #include "video/include/RendererSystem.hpp"
 #include <cstdio>
@@ -26,8 +25,6 @@ private:
         _helloworld->getComponent(video::RenderableComponent::TYPE_NAME)
             .cast<video::RenderableComponent>();
     auto &pos = renderable->getPosition();
-    auto &brush = renderable->getBrush();
-    auto attr = brush->getAttribute();
     if (codes.size() == 1) {
       if (codes[0] == system::Key::LEFT) {
         pos.x--;
@@ -42,12 +39,6 @@ private:
         pos.y++;
       }
       if (codes[0] == 'b') {
-        if (brush->getAttribute().flag & system::Terminal::Attr::COLOR) {
-          attr.flag &= ~system::Terminal::Attr::COLOR;
-        } else {
-          attr.flag |= system::Terminal::Attr::COLOR;
-        }
-        brush->setAttribute(attr);
       }
     }
   }
@@ -59,12 +50,9 @@ public:
     on(&GameMainSystem::onInput);
     _helloworld = new runtime::Entity{};
     auto renderable = new video::RenderableComponent();
-    renderable->setCharacter("Hello world");
-    renderable->getPosition() = {10, 10};
-    renderable->getBrush() = new video::Brush{{
-        .color = {0xfe, 0x0, 0xc0},
-        .flag = system::Terminal::Attr::COLOR,
-    }};
+    renderable->setCharacter("test中文测试");
+    renderable->getPosition() = {11, 10};
+
     _helloworld->addComponent(renderable);
   }
 };

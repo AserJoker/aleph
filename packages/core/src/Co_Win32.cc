@@ -1,13 +1,13 @@
 
+
+#ifdef WIN32
 #include "core/include/AutoPtr.hpp"
+#include "core/include/Co.hpp"
 #include "core/include/ObjectBase.hpp"
 #include "core/include/Singleton.hpp"
 #include <exception>
 #include <stdexcept>
 #include <string>
-#ifdef WIN32
-#include "core/include/Co.hpp"
-
 #include <vector>
 #include <windows.h>
 using namespace aleph;
@@ -34,12 +34,10 @@ static void onCoroutine(void *parameter) {
     coroutines[0]->error = e.what();
     ctx->running = false;
     core::Singleton<Co>::get()->yield();
-    current = 0;
   } catch (...) {
     coroutines[0]->error = "unknown coroutine error";
     ctx->running = false;
     core::Singleton<Co>::get()->yield();
-    current = 0;
   }
 }
 

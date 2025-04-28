@@ -470,4 +470,44 @@ void Terminal::setBackgroundColor(const core::Color &color) {
 void Terminal::print(const std::string &str) {
   write(STDOUT_FILENO, str.c_str(), str.length());
 }
+
+std::string Terminal::compile(const Attr &attr) {
+  std::vector<std::string> opts;
+  if (attr.flag & Attr::BOLD) {
+    opts.push_back("1");
+  }
+  if (attr.flag & Attr::HALF_BRIGHT) {
+    opts.push_back("2");
+  }
+  if (attr.flag & Attr::ITALIC) {
+    opts.push_back("3");
+  }
+  if (attr.flag & Attr::UNDERLINE) {
+    opts.push_back("4");
+  }
+  if (attr.flag & Attr::BLINK) {
+    opts.push_back("5");
+  }
+  if (attr.flag & Attr::COLOR) {
+    opts.push_back("38;2");
+    opts.push_back(std::to_string(attr.color.r));
+    opts.push_back(std::to_string(attr.color.g));
+    opts.push_back(std::to_string(attr.color.b));
+  }
+  if (attr.flag & Attr::BACKGROUND) {
+    opts.push_back("48;2");
+    opts.push_back(std::to_string(attr.background.r));
+    opts.push_back(std::to_string(attr.background.g));
+    opts.push_back(std::to_string(attr.background.b));
+  }
+  std::string result = "\033[";
+  for (size_t index = 0; index < opts.size(); index++) {
+    result += opts[index];
+    if (index != opts.size() - 1) {
+      result += ";";
+    }
+  }
+  result += "m";
+  return result;
+}
 #endif

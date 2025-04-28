@@ -21,12 +21,16 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
         continue;
       }
       auto &ustr = component->getCharacter();
+      int32_t offset = 0;
       for (int32_t idx = 0; idx < (int32_t)ustr.length(); idx++) {
-        if (col + idx >= 0 && col + idx < (int32_t)size.width) {
-          current[row][col + idx] = {
-              .brush = component->getBrush(),
-              .chr = ustr.at(idx),
-          };
+        current[row][col + offset] = {
+            .brush = component->getBrush(),
+            .chr = ustr.at(idx),
+        };
+        if (current[row][col + offset].chr.length() > 1) {
+          offset += 2;
+        } else {
+          offset += 1;
         }
       }
     }
@@ -36,14 +40,14 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
     for (auto &[col, pixel] : line) {
       if (!current.contains(row) || !current.at(row).contains(col)) {
         diff[row][col] = {
-            .chr = {' ', 0},
+            .chr = {' '},
         };
       }
     }
   }
   for (auto &[row, line] : current) {
     for (auto &[col, pixel] : line) {
-      if (pixel.brush->isUpdated()) {
+      if (pixel.brush && pixel.brush->isUpdated()) {
         diff[row][col] = pixel;
         pixel.brush->setIsUpdated(false);
       } else if (_current.contains(row) && _current.at(row).contains(col) &&
@@ -58,43 +62,46 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
     return;
   }
   for (auto &[row, line] : diff) {
+    auto &current = _current[row];
     for (auto &[col, pixel] : line) {
-      _current[row][col] = pixel;
+      if (current.contains(col - 1)) {
+        auto chr = current.at(col - 1).chr;
+        if (chr.length() > 1) {
+          current.erase(col);
+        } else {
+          current[col] = pixel;
+        }
+      } else {
+        current[col] = pixel;
+      }
     }
-  }
-  for (auto &[row, line] : _current) {
+    std::string result;
     size_t idx = 0;
-    std::string str;
-    for (auto &[col, pixel] : line) {
+    for (auto &[col, pixel] : current) {
       while (idx < col) {
-        str.push_back(' ');
+        result += ' ';
         idx++;
       }
-      if (pixel.brush) {
-        if (!_brush || _brush->getHandle() != pixel.brush) {
-          _brush = pixel.brush;
-          if (_brush) {
-            str += _brush->getFormat();
-          }
-        }
+      result += pixel.chr;
+      if (pixel.chr.length() > 1) {
+        idx += 2;
+      } else {
+        idx += 1;
       }
-      str += pixel.chr;
-      idx++;
     }
-    str += "\033[m";
+    auto it = current.begin();
+    while (it != current.end()) {
+      if (it->second.chr.size() == 1 && it->second.chr[0] == ' ' &&
+          !it->second.brush) {
+        current.erase(it);
+        it = current.begin();
+      } else {
+        it++;
+      }
+    }
     _terminal->move(1, row);
-    _terminal->print(str);
+    _terminal->print(result);
     _terminal->flush();
-  }
-  for (auto &[row, line] : diff) {
-    for (auto &[col, pixel] : line) {
-      if (pixel.brush == nullptr && pixel.chr[0] == ' ' && pixel.chr[1] == 0) {
-        _current[row].erase(col);
-        if (_current[row].empty()) {
-          _current.erase(row);
-        }
-      }
-    }
   }
 }
 
