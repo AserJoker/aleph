@@ -21,39 +21,48 @@ private:
     if (codes.size() == 1 && codes[0] == system::Key::ESC) {
       emit<runtime::QuitEvent>();
     }
-    auto renderable =
-        _helloworld->getComponent(video::RenderableComponent::TYPE_NAME)
-            .cast<video::RenderableComponent>();
-    auto &pos = renderable->getPosition();
-    if (codes.size() == 1) {
-      if (codes[0] == system::Key::LEFT) {
-        pos.x--;
-      }
-      if (codes[0] == system::Key::RIGHT) {
-        pos.x++;
-      }
-      if (codes[0] == system::Key::UP) {
-        pos.y--;
-      }
-      if (codes[0] == system::Key::DOWN) {
-        pos.y++;
-      }
-      if (codes[0] == 'b') {
+    for (auto &line : _lines) {
+      auto renderable = line->getComponent<video::RenderableComponent>();
+      auto &pos = renderable->getPosition();
+      if (codes.size() == 1) {
+        if (codes[0] == system::Key::LEFT) {
+          pos.x--;
+        }
+        if (codes[0] == system::Key::RIGHT) {
+          pos.x++;
+        }
+        if (codes[0] == system::Key::UP) {
+          pos.y--;
+        }
+        if (codes[0] == system::Key::DOWN) {
+          pos.y++;
+        }
+        if (codes[0] == 'b') {
+        }
       }
     }
   }
 
-  core::AutoPtr<runtime::Entity> _helloworld;
+  std::vector<core::AutoPtr<runtime::Entity>> _lines;
 
 public:
   GameMainSystem() {
+    std::string str = "";
     on(&GameMainSystem::onInput);
-    _helloworld = new runtime::Entity{};
-    auto renderable = new video::RenderableComponent();
-    renderable->setCharacter("test中文测试");
-    renderable->getPosition() = {1, 1};
-
-    _helloworld->addComponent(renderable);
+    FILE *fp = fopen("text.txt", "r");
+    int32_t y = 0;
+    while (!feof(fp)) {
+      char str[1024] = {};
+      fgets(str, 1024, fp);
+      auto entity = new runtime::Entity{};
+      auto renderable = new video::RenderableComponent{};
+      renderable->getPosition().y = y;
+      renderable->setCharacter(str);
+      entity->addComponent(renderable);
+      _lines.push_back(entity);
+      y++;
+    }
+    fclose(fp);
   }
 };
 

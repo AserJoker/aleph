@@ -27,20 +27,27 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
       int32_t offset = -1;
       for (int32_t idx = 0; idx < (int32_t)ustr.length(); idx++) {
         auto chr = ustr.at(idx);
-        if (col + offset >= 0) {
-          current[row][col + offset] = {
-              .brush = component->getBrush(),
-              .chr = chr,
-          };
+        std::vector tokens = {chr};
+        if (chr.size() == 1 && chr[0] < 0x20) {
+          tokens = {"^", {(char)(chr[0] + 'A')}};
         }
-        offset += core::UString(chr).getRenderWidth();
+        for (auto &ch : tokens) {
+          if (col + offset >= 0) {
+            current[row][col + offset] = {
+                .brush = component->getBrush(),
+                .chr = ch,
+            };
+          }
+          offset += core::UString(ch).getRenderWidth();
+        }
       }
     }
   }
   std::unordered_map<int32_t, std::map<int32_t, Pixel>> diff;
   for (auto &[row, line] : _current) {
     for (auto &[col, pixel] : line) {
-      if (!current.contains(row) || !current.at(row).contains(col)) {
+      if (!current.contains(row) || !current.at(row).contains(col) ||
+          current.at(row).at(col) != pixel) {
         diff[row][col] = {
             .chr = {' '},
         };
@@ -80,7 +87,6 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
     std::string result;
     size_t idx = 0;
     for (auto &[col, pixel] : current) {
-
       while (idx < col) {
         idx++;
         if (idx > size.width) {
