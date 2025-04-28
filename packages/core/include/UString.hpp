@@ -1,10 +1,13 @@
 #pragma once
 #include <string>
+#include <vector>
 namespace aleph::core {
 class UString {
 
 private:
   std::string _source;
+
+  std::vector<size_t> _uindices;
 
   size_t offsetOf(size_t index) const;
 
@@ -22,6 +25,8 @@ public:
   std::string at(size_t index) const;
 
   void set(size_t index, const std::string &chr);
+
+  void erase(size_t begin, size_t end = -1);
 
   std::string &getSource();
 
