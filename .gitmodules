@@ -1,0 +1,3 @@
+[submodule "deps/wtswidth"]
+	path = deps/wtswidth
+	url = https://github.com/AserJoker/wtswidth.git

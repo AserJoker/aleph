@@ -1,5 +1,6 @@
 #include "core/include/UString.hpp"
 #include <cstdint>
+#include <wtswidth.h>
 using namespace aleph;
 using namespace aleph::core;
 UString::UString(const std::string &source) : _source(source) {}
@@ -82,11 +83,7 @@ size_t UString::getRenderWidth() const {
   size_t size = 0;
   for (auto idx = 0; idx < length(); idx++) {
     auto chr = at(idx);
-    if (chr.size() > 1) {
-      size += 2;
-    } else {
-      size += 1;
-    }
+    size += wts8width(chr.c_str(), chr.length());
   }
   return size;
 }

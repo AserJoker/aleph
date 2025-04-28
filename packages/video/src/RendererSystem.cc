@@ -22,10 +22,10 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
         continue;
       }
       auto &ustr = component->getCharacter();
-      int32_t offset = 0;
+      int32_t offset = -1;
       for (int32_t idx = 0; idx < (int32_t)ustr.length(); idx++) {
         auto chr = ustr.at(idx);
-        if (col + offset >= 1) {
+        if (col + offset >= 0) {
           current[row][col + offset] = {
               .brush = component->getBrush(),
               .chr = chr,
@@ -87,7 +87,7 @@ void RendererSystem::onTick(core::Object *, const runtime::TickEvent &) {
         result += ' ';
       }
       idx += core::UString(pixel.chr).getRenderWidth();
-      if (idx > size.width) {
+      if (idx > size.width ) {
         break;
       }
       result += pixel.chr;
