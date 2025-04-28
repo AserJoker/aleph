@@ -19,7 +19,7 @@ struct Coroutine : public ObjectBase {
   std::string error;
 };
 
-std::vector<core::AutoPtr<Coroutine>> coroutines;
+static std::vector<core::AutoPtr<Coroutine>> coroutines;
 static size_t current = 0;
 
 static void onCoroutine(void *parameter) {

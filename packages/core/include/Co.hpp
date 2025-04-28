@@ -3,7 +3,7 @@
 #include "core/include/ObjectBase.hpp"
 #include "core/include/Task.hpp"
 #ifndef CO_STACK_SIZE
-#define CO_STACK_SIZE 4096
+#define CO_STACK_SIZE 1024 * 1024 * 2
 #endif
 namespace aleph::core {
 class Co : public ObjectBase {
